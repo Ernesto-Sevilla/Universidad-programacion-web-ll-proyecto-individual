@@ -4,40 +4,41 @@ import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import logo from "../../assets/tree.png";
 import { supabase } from "../../database/supabaseconfig.js";
 
-const [mostrarMenu, setMostrarMenu] = useState(false);
-const navigate = useNavigate();
-const location = useLocation(); // Para detectar la ruta actual
-
-const manejarToggle = () => setMostrarMenu(!mostrarMenu);
-
-const manejarNavegacion = (ruta) => {
-  navigate(ruta);
-  setMostrarMenu(false);
-};
-
-const cerrarSesion = async () => {
-  try {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-
-    localStorage.removeItem("usuario-supabase");
-    setMostrarMenu(false);
-    navigate("/login");
-  } catch (err) {
-    console.error("Error cerrando sesión:", err.message);
-  }
-};
-
-// Detectar rutas especiales
-const esLogin = location.pathname === "/login";
-const esCatalogo =
-  location.pathname === "/catalogo" &&
-  localStorage.getItem("usuario-supabase") === null;
-
-// Contenido del menú
-let contenidoMenu;
-
 const Encabezado = () => {
+
+  const [mostrarMenu, setMostrarMenu] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation(); // Para detectar la ruta actual
+
+  const manejarToggle = () => setMostrarMenu(!mostrarMenu);
+
+  const manejarNavegacion = (ruta) => {
+    navigate(ruta);
+    setMostrarMenu(false);
+  };
+
+  const cerrarSesion = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      localStorage.removeItem("usuario-supabase");
+      setMostrarMenu(false);
+      navigate("/login");
+    } catch (err) {
+      console.error("Error cerrando sesión:", err.message);
+    }
+  };
+
+  // Detectar rutas especiales
+  const esLogin = location.pathname === "/login";
+  const esCatalogo =
+    location.pathname === "/catalogo" &&
+    localStorage.getItem("usuario-supabase") === null;
+
+  // Contenido del menú
+  let contenidoMenu;
+
   if (esLogin) {
     contenidoMenu = (
       <Nav className="ms-auto pe-2">
