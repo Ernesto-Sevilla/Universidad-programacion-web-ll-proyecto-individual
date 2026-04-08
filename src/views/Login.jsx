@@ -9,6 +9,13 @@ const Login = () => {
   const [error, setError] = useState(null);
   const navegar = useNavigate();
 
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem("usuario-supabase");
+    if (usuarioGuardado) {
+      navegar("/");
+    }
+  }, [navegar]);
+
   const iniciarSesion = async () => {
 
     const usuarioValido = { email: "admin@correo.com", password: "123" };
