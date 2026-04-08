@@ -10,7 +10,11 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
 
         {error && <Alert variant="danger">{error}</Alert>}
 
-        <Form>
+        <Form onSubmit={(e) => {
+          e.preventDefault(); // Evita que la página se recargue
+          iniciarSesion();
+        }}>
+
           <Form.Group className="mb-3" controlId="usuario">
             <Form.Label>Usuario</Form.Label>
             <Form.Control
@@ -33,7 +37,7 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
             />
           </Form.Group>
 
-          <Button variant="primary" className="w-100" onClick={iniciarSesion}>
+          <Button variant="primary" type="submit" className="w-100">
             Iniciar Sesión
           </Button>
         </Form>
