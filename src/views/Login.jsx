@@ -18,7 +18,7 @@ const Login = () => {
 
   const iniciarSesion = async () => {
 
-    const usuarioValido = { email: "admin@correo.com", password: "123" };
+    const usuarioValido = { email: "dev51unan@gmail.com", password: "123456" };
 
     try {
       if (usuario === usuarioValido.email && contrasena === usuarioValido.password) {
