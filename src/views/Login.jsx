@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FormularioLogin from " .. /components/login/FormularioLogin";
+import FormularioLogin from "../components/login/FormularioLogin.jsx";
 import { Container, Row, Col } from "react-bootstrap";
 
 const Login = () => {
@@ -63,13 +63,16 @@ const Login = () => {
   };
 
   return (
-    <Container className="mt-3">
-      <Row className="align-items-center">
-        <Col>
-          <h2><i className="bi-house-fill me-2"></i> Login</h2>
-        </Col>
-      </Row>
-    </Container>
+    <div className="contenedor-login">
+      <FormularioLogin
+        usuario={usuario}
+        contrasena={contrasena}
+        error={error}
+        setUsuario={setUsuario}
+        setContrasena={setContrasena}
+        iniciarSesion={iniciarSesion}
+      />
+    </div>
   );
 };
 
