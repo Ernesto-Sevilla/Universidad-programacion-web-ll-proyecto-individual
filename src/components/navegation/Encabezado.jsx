@@ -18,12 +18,14 @@ const Encabezado = () => {
 
   const cerrarSesion = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
       localStorage.removeItem("usuario-supabase");
-      setMostrarMenu(false);
+
+      if (setMostrarMenu) setMostrarMenu(false);
+
       navigate("/login");
+
+      console.log("Sesión cerrada localmente con éxito");
+
     } catch (err) {
       console.error("Error cerrando sesión:", err.message);
     }
@@ -99,7 +101,6 @@ const Encabezado = () => {
               {mostrarMenu ? <i className="bi-images me-2"></i> : null}
               <strong>Catálogo</strong>
             </Nav.Link>
-            <hr />
 
             {/* Ícono cerrar sesión en barra superior */}
             {mostrarMenu ? null : (
