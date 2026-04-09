@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
+import { Navigate } from "react-router-dom";
 
-const RutaProtegida = () => {
-
-  return (
-    <Container className="mt-3">
-      <Row className="align-items-center">
-        <Col>
-          <h2><i className="bi-house-fill me-2"></i> Ruta Protegida </h2>
-        </Col>
-      </Row>
-    </Container>
-  );
-};
+const RutaProtegida = ({ children }) => {
+  // Verifica si el usuario está autenticado usando 
+  
+  localStorage
+    const estaLogueado = !!localStorage.getItem("usuario-supabase");
+  
+  // Log para depuración
+  console.log("Usuario autenticado: ", estaLogueado);
+    
+  //Si está autenticado, redirige a la página de login
+  return estaLogueado ? children: <Navigate to="/login" replace/>;};
 
 export default RutaProtegida;
