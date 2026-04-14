@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import logo from "../../assets/tree.png";
+import { supabase } from "../../database/supabaseconfig";
 
 const Encabezado = () => {
 
@@ -18,13 +19,14 @@ const Encabezado = () => {
 
   const cerrarSesion = async () => {
     try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
       localStorage.removeItem("usuario-supabase");
-
-      if (setMostrarMenu) setMostrarMenu(false);
-
+      setMostrarMenu(false);
       navigate("/login");
 
-      console.log("Sesión cerrada localmente con éxito");
+      console.log("Sesión cerrada con éxito");
 
     } catch (err) {
       console.error("Error cerrando sesión:", err.message);
