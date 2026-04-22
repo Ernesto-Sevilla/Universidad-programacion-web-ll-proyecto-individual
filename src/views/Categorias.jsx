@@ -4,9 +4,13 @@ import { supabase } from "../database/supabaseconfig";
 
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import NotificacionOperacion from "../components/NotificationOperation";
+import TablaCategorias from "../components/categorias/TablaCategorias";
 
 const Categorias = () => {
 
+  const [categorias, setCategorias] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
   const [mostrarModal, setMostrarModal] = useState(false);
 
@@ -106,6 +110,19 @@ const Categorias = () => {
         manejoCambioInput={manejoCambioInput}
         agregarCategoria={agregarCategoria}
       />
+
+      {/* Tabla */}
+        {!cargando && categorias.length > 0 && (
+            <Row>
+              <Col lg={12}>
+                  <TablaCategorias
+                            categorias={categorias}
+                            abrirModalEdicion={() => alert("Modal Edición - Pendiente crear")}
+                            abrirModalEliminacion={() => alert("Modal Eliminación - Pendiente crear")}
+                        />
+                    </Col>
+                </Row>
+            )}
 
       {/* Notificación */}
       <NotificacionOperacion
