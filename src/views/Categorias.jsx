@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import NotificacionOperacion from "../components/NotificationOperation";
+import TablaCategorias from "../components/categorias/TablaCategorias";
 
 const Categorias = () => {
+
+  const [categorias, setCategorias] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -22,6 +26,29 @@ const Categorias = () => {
       [name]: value,
     }));
   };
+
+  // 2. Función para traer los datos
+  const cargarCategorias = async () => {
+    try {
+      setCargando(true);
+      const { data, error } = await supabase
+        .from("categorias")
+        .select("*")
+        .order("id_categoria", { ascending: true }); // Usando el nombre correcto
+
+      if (error) throw error;
+      setCategorias(data || []);
+    } catch (err) {
+      console.error("Error:", err.message);
+    } finally {
+      setCargando(false); // ¡Esto hace que la tabla aparezca!
+    }
+  };
+
+  // 3. Ejecutar al cargar la página
+  useEffect(() => {
+    cargarCategorias();
+  }, []);
 
   const agregarCategoria = async () => {
     try {
@@ -62,6 +89,7 @@ const Categorias = () => {
       });
 
       // Limpiar formulario y cerrar modal
+      await cargarCategorias(); // Recargar categorías para mostrar la nueva
       setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
       setMostrarModal(false);
 
@@ -106,6 +134,28 @@ const Categorias = () => {
         manejoCambioInput={manejoCambioInput}
         agregarCategoria={agregarCategoria}
       />
+
+      {/* Tabla */}
+      {!cargando && categorias.length > 0 && (
+        <Row>
+          <Col lg={12}>
+            <TablaCategorias
+              categorias={categorias}
+              abrirModalEdicion={() => alert("Modal Edición - Pendiente crear")}
+              abrirModalEliminacion={() => alert("Modal Eliminación - Pendiente crear")}
+            />
+          </Col>
+        </Row>
+      )}
+
+      {/* Sin registros */}
+      {!cargando && categorias.length === 0 && (
+        <Row className="text-center my-5">
+          <Col>
+            <p className="text-muted fs-5">No hay categorías registradas todavía.</p>
+          </Col>
+        </Row>
+      )}
 
       {/* Notificación */}
       <NotificacionOperacion
