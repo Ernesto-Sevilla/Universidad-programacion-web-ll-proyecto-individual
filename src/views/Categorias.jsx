@@ -12,6 +12,13 @@ const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
 
+  const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
+
+  const [categoriaEditar, setCategoriaEditar] = useState({
+    nombre_categoria: "",
+    descripcion_categoria: ""
+  });
+
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
   const [mostrarModal, setMostrarModal] = useState(false);
 
@@ -28,7 +35,16 @@ const Categorias = () => {
     }));
   };
 
-    const manejoCambioInputEdicion = (e) => {
+  const abrirModalEdicion = (categoria) => {
+    setCategoriaEditar({
+      id_categoria: categoria.id_categoria, // Asegúrate que coincida con el nombre en DB
+      nombre_categoria: categoria.nombre_categoria,
+      descripcion_categoria: categoria.descripcion_categoria,
+    });
+    setMostrarModalEdicion(true); // Ahora sí abrimos el modal
+  };
+
+  const manejoCambioInputEdicion = (e) => {
     const { name, value } = e.target;
     setCategoriaEditar((prev) => ({
       ...prev,
@@ -71,12 +87,12 @@ const Categorias = () => {
       setMostrarModalEdicion(false);
 
       const { error } = await supabase
-      .from("categorias")
-      .update({
-        nombre_categoria: categoriaEditar.nombre_categoria,
-        descripcion_categoria: categoriaEditar.descripcion_categoria,
-      })
-      .eq("id_categoria", categoriaEditar.id_categoria);
+        .from("categorias")
+        .update({
+          nombre_categoria: categoriaEditar.nombre_categoria,
+          descripcion_categoria: categoriaEditar.descripcion_categoria,
+        })
+        .eq("id_categoria", categoriaEditar.id_categoria);
 
       if (error) {
         console.error("Error al actualizar categorías: ", error.message);
@@ -195,13 +211,13 @@ const Categorias = () => {
       />
 
       {/* Modal de edición de categoría */}
-        <ModalEdicionCategoria
-          mostrarModalEdicion={mostrarModalEdicion}
-          SetMostrarModalEdicion={setMostrarModalEdicion}
-          categoriaEditar={categoriaEditar}
-          manejoCambioInputEdicion={manejoCambioInputEdicion}
-          actualizarCategoria={actualizarCategoria}
-        />
+      <ModalEdicionCategoria
+        mostrarModalEdicion={mostrarModalEdicion}
+        SetMostrarModalEdicion={setMostrarModalEdicion}
+        categoriaEditar={categoriaEditar}
+        manejoCambioInputEdicion={manejoCambioInputEdicion}
+        actualizarCategoria={actualizarCategoria}
+      />
 
       {/* Tabla */}
       {!cargando && categorias.length > 0 && (
@@ -209,7 +225,7 @@ const Categorias = () => {
           <Col lg={12}>
             <TablaCategorias
               categorias={categorias}
-              abrirModalEdicion={() => alert("Modal Edición - Pendiente crear")}
+              abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={() => alert("Modal Eliminación - Pendiente crear")}
             />
           </Col>

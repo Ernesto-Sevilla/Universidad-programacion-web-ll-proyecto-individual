@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Form, Button, ModalTitle, ModalBody, FormGroup, FormLabel, FormControl, ModalFooter } from "react-bootstrap";
 
-const [deshabilitado, setDeshabilitado] = useState(false);
-
-const handleActualizar = async () => {
-  if (deshabilitado) return;
-  setDeshabilitado(true);
-  await actualizarCategoria();
-  setDeshabilitado(false);
-};
-
 const ModalEdicionCategoria = ({
   mostrarModalEdicion,
   SetMostrarModalEdicion,
@@ -17,6 +8,15 @@ const ModalEdicionCategoria = ({
   manejoCambioInputEdicion,
   actualizarCategoria,
 }) => {
+
+  const [deshabilitado, setDeshabilitado] = useState(false);
+
+  const handleActualizar = async () => {
+    if (deshabilitado) return;
+    setDeshabilitado(true);
+    await actualizarCategoria();
+    setDeshabilitado(false);
+  };
 
   return (
     <Modal
