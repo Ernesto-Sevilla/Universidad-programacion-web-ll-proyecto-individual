@@ -25,7 +25,7 @@ const Producto = () => {
   const [cargando, setCargando] = useState(true);
 
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [abrirModalEliminacion, setAbrirModalEliminacion] = useState(false);
+  const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
   const [abrirModalEdicion, setAbirModalEdicion] = useState(false);
 
   const [nuevoProducto, setNuevoProducto] = useState({
@@ -596,7 +596,7 @@ const generarPDFProducto = async (producto) => {
               <TarjetasProductos
                 productos={productosPaginadas}
                 abrirModalEdicion={abrirModalEdicion}
-                abrirModalEliminacion={abrirModalEliminacion}
+                mostrarModalEliminacion={mostrarModalEliminacion}
                 generarPDFProducto={generarPDFProducto}
               />
             </Col>
@@ -604,7 +604,7 @@ const generarPDFProducto = async (producto) => {
               <TablaProductos
                 productos={productosPaginadas}
                 abrirModalEdicion={abrirModalEdicion}
-                abrirModalEliminacion={abrirModalEliminacion}
+                mostrarModalEliminacion={mostrarModalEliminacion}
                 generarPDFProducto={generarPDFProducto}
               />
             </Col>
