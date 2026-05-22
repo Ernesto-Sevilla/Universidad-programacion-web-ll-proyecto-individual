@@ -556,8 +556,6 @@ const generarPDFProducto = async (producto) => {
       />
 
       <ModalEdicionProducto
-        mostrarModalEdicion={mostrarModalEdicion}
-        setMostrarModalEdicion={setMostrarModalEdicion}
         productoEditar={productoEditar}
         manejoCambioInputEdicion={manejoCambioInputEdicion}
         manejoCambioArchivoActualizar={manejoCambioArcvhivoActualizar}
