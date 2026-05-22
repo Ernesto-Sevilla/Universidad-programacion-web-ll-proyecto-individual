@@ -26,7 +26,7 @@ const Producto = () => {
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
-  const [abrirModalEdicion, setAbirModalEdicion] = useState(false);
+  const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
 
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre_producto: "",
@@ -358,6 +358,11 @@ const Producto = () => {
 
   };
 
+  const abrirModalEdicion = (producto) => {
+    setProductoEditar(producto);     // 1. Guarda el producto clickeado en el estado
+    setMostrarModalEdicion(true);    // 2. Abre el modal (cambia el booleano a true)
+  };
+
   // ############################# ELIMINAR PRODUCTO #############################
   // Agrega esto en tu vista principal junto a tus otros métodos
   const abrirModalEliminacion = (producto) => {
@@ -562,6 +567,8 @@ const Producto = () => {
       />
 
       <ModalEdicionProducto
+        mostrarModalEdicion={mostrarModalEdicion}
+        setMostrarModalEdicion={setMostrarModalEdicion}
         productoEditar={productoEditar}
         manejoCambioInputEdicion={manejoCambioInputEdicion}
         manejoCambioArchivoActualizar={manejoCambioArcvhivoActualizar}
@@ -609,7 +616,7 @@ const Producto = () => {
             <Col lg={12} className="d-none d-lg-block">
               <TablaProductos
                 productos={productosPaginadas}
-                abrirModalEdicion={abrirModalEdicion} e
+                abrirModalEdicion={abrirModalEdicion} 
                 abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFProducto={generarPDFProducto}
               />
