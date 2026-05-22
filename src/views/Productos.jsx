@@ -359,6 +359,12 @@ const Producto = () => {
   };
 
   // ############################# ELIMINAR PRODUCTO #############################
+  // Agrega esto en tu vista principal junto a tus otros métodos
+  const abrirModalEliminacion = (producto) => {
+    setProductoAEliminar(producto);     // Guarda el producto seleccionado temporalmente
+    setMostrarModalEliminacion(true);   // Abre el modal de confirmación
+  };
+
   const eliminarProducto = async () => {
     if (!productoAEliminar) return;
 
@@ -414,79 +420,79 @@ const Producto = () => {
 
   //############################Generar PDF de producto########################
 
-// Función auxiliar para convertir URL a Base64
-const getBase64ImageFromURL = (url) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.setAttribute("crossOrigin", "anonymous");
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL("image/png");
-      resolve(dataURL);
-    };
-    img.onerror = (error) => reject(error);
-    img.src = url;
-  });
-};
+  // Función auxiliar para convertir URL a Base64
+  const getBase64ImageFromURL = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous");
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL("image/png");
+        resolve(dataURL);
+      };
+      img.onerror = (error) => reject(error);
+      img.src = url;
+    });
+  };
 
-// Versión mejorada con imagen incluida
-const generarPDFProducto = async (producto) => {
-  const doc = new jsPDF();
+  // Versión mejorada con imagen incluida
+  const generarPDFProducto = async (producto) => {
+    const doc = new jsPDF();
 
-  // Título
-  doc.setFontSize(18);
-  doc.setTextColor(40);
-  doc.text("REPORTE DETALLADO DE PRODUCTO", 14, 20);
+    // Título
+    doc.setFontSize(18);
+    doc.setTextColor(40);
+    doc.text("REPORTE DETALLADO DE PRODUCTO", 14, 20);
 
-  // Línea decorativa
-  doc.setLineWidth(0.5);
-  doc.line(14, 25, 195, 25);
+    // Línea decorativa
+    doc.setLineWidth(0.5);
+    doc.line(14, 25, 195, 25);
 
-  // Intentamos cargar la imagen si existe
-  let imageData = null;
-  if (producto.imagen_url) {
-    try {
-      imageData = await getBase64ImageFromURL(producto.imagen_url);
-    } catch (e) {
-      console.error("No se pudo cargar la imagen para el PDF", e);
+    // Intentamos cargar la imagen si existe
+    let imageData = null;
+    if (producto.imagen_url) {
+      try {
+        imageData = await getBase64ImageFromURL(producto.imagen_url);
+      } catch (e) {
+        console.error("No se pudo cargar la imagen para el PDF", e);
+      }
     }
-  }
 
-  // Información del producto en tabla
-  autoTable(doc, {
-    startY: 35,
-    theme: 'striped',
-    head: [["Campo", "Información"]],
-    body: [
-      ["ID del Sistema", producto.id_producto],
-      ["Nombre Comercial", producto.nombre_producto],
-      ["Categoría", producto.categorias?.nombre_categoria || "Sin categoría"],
-      ["Precio de Venta", `$${parseFloat(producto.precio_venta).toFixed(2)}`],
-      ["Descripción", producto.descripcion_producto || "Sin descripción"],
-    ],
-    headStyles: { fillColor: [41, 128, 185] }, // Un azul profesional
-  });
+    // Información del producto en tabla
+    autoTable(doc, {
+      startY: 35,
+      theme: 'striped',
+      head: [["Campo", "Información"]],
+      body: [
+        ["ID del Sistema", producto.id_producto],
+        ["Nombre Comercial", producto.nombre_producto],
+        ["Categoría", producto.categorias?.nombre_categoria || "Sin categoría"],
+        ["Precio de Venta", `$${parseFloat(producto.precio_venta).toFixed(2)}`],
+        ["Descripción", producto.descripcion_producto || "Sin descripción"],
+      ],
+      headStyles: { fillColor: [41, 128, 185] }, // Un azul profesional
+    });
 
-  // Si hay imagen, la añadimos después de la tabla
-  if (imageData) {
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.text("Imagen de referencia:", 14, finalY);
-    // addImage(datos, formato, x, y, ancho, alto)
-    doc.addImage(imageData, "PNG", 14, finalY + 5, 50, 50);
-  }
+    // Si hay imagen, la añadimos después de la tabla
+    if (imageData) {
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.text("Imagen de referencia:", 14, finalY);
+      // addImage(datos, formato, x, y, ancho, alto)
+      doc.addImage(imageData, "PNG", 14, finalY + 5, 50, 50);
+    }
 
-  // Pie de página con fecha
-  const fecha = new Date().toLocaleDateString();
-  doc.setFontSize(10);
-  doc.text(`Reporte generado el: ${fecha}`, 14, 285);
+    // Pie de página con fecha
+    const fecha = new Date().toLocaleDateString();
+    doc.setFontSize(10);
+    doc.text(`Reporte generado el: ${fecha}`, 14, 285);
 
-  // Descargar
-  doc.save(`Ficha_${producto.nombre_producto.replace(/\s+/g, '_')}.pdf`);
-};
+    // Descargar
+    doc.save(`Ficha_${producto.nombre_producto.replace(/\s+/g, '_')}.pdf`);
+  };
 
   //###########################################################
 
@@ -596,15 +602,15 @@ const generarPDFProducto = async (producto) => {
               <TarjetasProductos
                 productos={productosPaginadas}
                 abrirModalEdicion={abrirModalEdicion}
-                mostrarModalEliminacion={mostrarModalEliminacion}
+                abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFProducto={generarPDFProducto}
               />
             </Col>
             <Col lg={12} className="d-none d-lg-block">
               <TablaProductos
                 productos={productosPaginadas}
-                abrirModalEdicion={abrirModalEdicion}
-                mostrarModalEliminacion={mostrarModalEliminacion}
+                abrirModalEdicion={abrirModalEdicion} e
+                abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFProducto={generarPDFProducto}
               />
             </Col>
