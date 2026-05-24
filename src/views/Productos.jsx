@@ -16,7 +16,22 @@ import TarjetasProductos from "../components/productos/TarjetasProductos";
 
 const Producto = () => {
 
-  const [productos, setProductos] = useState([]);
+  const {
+    productosFiltrados,
+    textoBusqueda,
+    setTextoBusqueda,
+    cargando,
+    nuevoProducto,
+    productoEditar,
+    productoAEliminar,
+    manejoCambioInput,
+    manejoCambioArchivo,
+    manejoCambioInputEdicion,
+    manejoCambioArchivoActualizar,
+    agregarProducto,
+    actualizarProducto,
+    eliminarProducto
+  } = useProductos();
 
   const [productosFiltrados, setProductosFiltrados] = useState([]);
 
@@ -28,64 +43,7 @@ const Producto = () => {
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
 
-  const [nuevoProducto, setNuevoProducto] = useState({
-    nombre_producto: "",
-    descripcion_producto: "",
-    categoria_producto: "",
-    precio_venta: "",
-    archivo: null,
-  });
-
-  const [productoEditar, setProductoEditar] = useState({
-    id_producto: "",
-    nombre_producto: "",
-    descripcion_producto: "",
-    categoria_producto: "",
-    precio_venta: "",
-    imagen_url: "",
-    archivo: null,
-  });
-
-  const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [toast, setToast] = useState({ mostrar: false, message: "", tipo: "" });
-
-
-  const manejoCambioInput = (e) => {
-    const { name, value } = e.target;
-    setNuevoProducto((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-
-  const manejoCambioArchivo = (e) => {
-    const archivo = e.target.files[0];
-    if (archivo && archivo.type.startsWith("image/")) {
-      setNuevoProducto((prev) => ({
-        ...prev, archivo
-      }));
-    } else {
-      alert("Selecciona una imagen válida (JPG, PNG etc.)");
-    }
-  };
-
-  const manejarBusqueda = (e) => {
-    setTextoBusqueda(e.target.value);
-  };
-
-  const cargarCategorias = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("categorias")
-        .select("*")
-        .order("id_categoria", { ascending: true });
-      if (error) throw error;
-      setCategorias(data || []);
-    } catch (err) {
-      console.error("Error al cargar categorías:", err);
-    }
-  };
 
   // ####################### REGISTRO DE CATEGORÍAS ###########################
   const [mostrarModalCategoria, setMostrarModalCategoria] = useState(false);
@@ -139,279 +97,14 @@ const Producto = () => {
     }
   };
 
-  // ##################CARGA DE PRODUCTOS EN TABLA###########################
-  const cargarProductos = async () => {
-    setCargando(true);
-
-    try {
-      const { data, error } = await supabase
-        .from("productos")
-        .select(
-          `*,
-          categorias (
-            nombre_categoria
-          )
-        `)
-        .order("id_producto", { ascending: false });
-
-      if (error) throw error;
-      setProductos(data || []);
-      setProductosFiltrados(data || []);
-    } catch (err) {
-      console.error("Error al cargar productos: ", err);
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  useEffect(() => {
-    cargarProductos();
-  }, []);
-
-  // ###############################################
-
-  useEffect(() => {
-    if (!textoBusqueda.trim()) {
-      setProductosFiltrados(productos);
-    } else {
-      const textoLower = textoBusqueda.toLowerCase();
-      const filtrados = productos.filter((prod) => {
-        const nombre = prod.nombre_producto?.toLowerCase() || "";
-        const descripcion = prod.descripcion_producto?.toLowerCase() || "";
-        const precio = prod.precio_venta?.toString() || "";
-
-        return (
-          nombre.includes(textoLower) ||
-          descripcion.includes(textoLower) ||
-          precio.includes(textoLower)
-        );
-      });
-      setProductosFiltrados(filtrados);
-    }
-  }, [textoBusqueda, productos]);
-
+  
   useEffect(() => {
     cargarCategorias();
   }, []);
 
 
-  /* ****************************************************************************** */
-  const agregarProducto = async () => {
-    try {
-      if (
-        !nuevoProducto.nombre_producto.trim() ||
-        !nuevoProducto.precio_venta ||
-        !nuevoProducto.categoria_producto ||
-        !nuevoProducto.archivo
-      ) {
-        setToast({
-          mostrar: true,
-          message: "Por favor completa todos los campos son obligatorios.",
-          tipo: "advertencia",
-        });
-        return;
-      }
+  
 
-      setMostrarModal(false);
-
-      const nombreArchivo = `${Date.now()}_${nuevoProducto.archivo.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("imagenes_productos")
-        .upload(nombreArchivo, nuevoProducto.archivo);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("imagenes_productos")
-        .getPublicUrl(nombreArchivo);
-      const urlPublica = urlData.publicUrl;
-
-      const { error } = await supabase.from("productos").insert([
-        {
-          nombre_producto: nuevoProducto.nombre_producto,
-          descripcion_producto: nuevoProducto.descripcion_producto || null,
-          categoria_producto: nuevoProducto.categoria_producto,
-          precio_venta: parseFloat(nuevoProducto.precio_venta),
-          imagen_url: urlPublica,
-        },
-      ]);
-
-      if (error) throw error;
-
-      await cargarProductos();
-      setMostrarModal(false);
-
-      setNuevoProducto({
-        nombre_producto: "",
-        descripcion_producto: "",
-        categoria_producto: "",
-        precio_venta: "",
-        archivo: null,
-      });
-
-      setToast({
-        mostrar: true,
-        message: "Producto agregado exitosamente.",
-        tipo: "exito",
-      });
-
-    } catch (err) {
-      console.error("Error al agregar producto:", err);
-      setToast({
-        mostrar: true,
-        message: "Error al agregar el producto. Intenta nuevamente.",
-        tipo: "error",
-      });
-    }
-  };
-
-  // ############################ EDITAR PRODUCTO ###############################
-  const manejoCambioInputEdicion = (e) => {
-    const { name, value } = e.target;
-    setProductoEditar((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const manejoCambioArcvhivoActualizar = (e) => {
-    const archivo = e.target.files[0];
-    if (archivo && archivo.type.startsWith("image/")) {
-      setProductoEditar((prev) => ({ ...prev, archivo }));
-    } else {
-      alert("Selecciona una imagen válida (JPG, PNG, etc.");
-    }
-  };
-
-  const actualizarProducto = async () => {
-    try {
-
-      if (
-        !productoEditar.nombre_producto.trim() ||
-        !productoEditar.categoria_producto ||
-        !productoEditar.precio_venta
-      ) {
-        setToast({
-          mostrar: true,
-          message: "Completa los campos obligatorios",
-          tipo: "advertencia",
-        });
-        return;
-      }
-
-      let datosActualizados = {
-        nombre_producto: productoEditar.nombre_producto,
-        descripcion_producto: productoEditar.descripcion_producto || null,
-        categoria_producto: productoEditar.categoria_producto,
-        precio_venta: parseFloat(productoEditar.precio_venta),
-        imagen_url: productoEditar.imagen_url,
-      };
-
-      if (productoEditar.archivo) {
-
-        const nombreArchivo = `${Date.now()}_${productoEditar.archivo.name}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("imagenes_productos")
-          .upload(nombreArchivo, productoEditar.archivo);
-
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from("imagenes_productos")
-          .getPublicUrl(nombreArchivo);
-        datosActualizados.imagen_url = urlData.publicUrl;
-
-        if (productoEditar.imagen_url) {
-          const nombreAnterior = productoEditar.imagen_url.split("/").pop().split("?")[0];
-          await supabase.storage.from("imagenes_productos").remove([nombreAnterior]).catch((e) => {
-            console.warn("No se pudo borrar la imagen anterior, quizas ya no existía", err);
-          });
-        }
-      }
-
-      const { error } = await supabase
-        .from("productos")
-        .update(datosActualizados)
-        .eq("id_producto", productoEditar.id_producto);
-
-      if (error) throw error;
-
-      await cargarProductos();
-
-      setProductoEditar({
-        id_producto: "",
-        nombre_producto: "",
-        descripcion_producto: "",
-        categoria_producto: "",
-        precio_venta: "",
-        imagen_url: "",
-        archivo: null,
-      });
-
-      setToast({ mostrar: true, message: "Producto actualizado correctamente", tipo: "exito" });
-
-      setMostrarModalEdicion(false);
-
-    } catch (err) {
-      console.error("Error al actualizar: ", err);
-      setToast({ mostrar: true, message: "Error al actualizar producto", tipo: "error" })
-    }
-
-  };
-
-  const abrirModalEdicion = (producto) => {
-    setProductoEditar(producto);     // 1. Guarda el producto clickeado en el estado
-    setMostrarModalEdicion(true);    // 2. Abre el modal (cambia el booleano a true)
-  };
-
-  // ############################# ELIMINAR PRODUCTO #############################
-  // Agrega esto en tu vista principal junto a tus otros métodos
-  const abrirModalEliminacion = (producto) => {
-    setProductoAEliminar(producto);     // Guarda el producto seleccionado temporalmente
-    setMostrarModalEliminacion(true);   // Abre el modal de confirmación
-  };
-
-  const eliminarProducto = async () => {
-    if (!productoAEliminar) return;
-
-    try {
-      setMostrarModalEliminacion(false);
-
-      // 1. Opcional pero recomendado: Borrar la imagen del Storage
-      if (productoAEliminar.imagen_url) {
-        // Extraemos el nombre del archivo de la URL pública
-        const urlPartes = productoAEliminar.imagen_url.split("/");
-        const nombreArchivo = urlPartes[urlPartes.length - 1];
-
-        await supabase.storage
-          .from("imagenes_productos")
-          .remove([nombreArchivo]);
-      }
-
-      // 2. Borrar el registro de la base de datos
-      const { error } = await supabase
-        .from("productos")
-        .delete()
-        .eq("id_producto", productoAEliminar.id_producto);
-
-      if (error) throw error;
-
-      // 3. Notificar y recargar
-      await cargarProductos();
-      setToast({
-        mostrar: true,
-        message: `Producto "${productoAEliminar.nombre_producto}" eliminado.`,
-        tipo: "exito",
-      });
-
-    } catch (err) {
-      console.error("Error al eliminar:", err.message);
-      setToast({
-        mostrar: true,
-        message: "Error al eliminar el producto.",
-        tipo: "error",
-      });
-    }
-  };
 
 
   // ############################Paginación###################
