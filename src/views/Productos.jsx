@@ -1,8 +1,10 @@
 import React, { use, useEffect, useState } from "react";
-import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+import { useProductos } from "../components/hooks/useProductos.js"
 
 import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
 import NotificacionOperacion from "../components/NotificationOperation";
@@ -16,36 +18,40 @@ import TarjetasProductos from "../components/productos/TarjetasProductos";
 
 const Producto = () => {
 
+  const [toast, setToast] = useState({ mostrar: false, message: "", tipo: "" });
+
+  /**
+   * Función puente para que el hook dispare las alertas visuales de esta vista
+   */
+  const notificarAlUsuario = (message, tipo) => {
+    setToast({ mostrar: true, message, tipo });
+  };
+
+
   const {
     productosFiltrados,
     textoBusqueda,
     setTextoBusqueda,
     cargando,
     nuevoProducto,
+    setNuevoProducto,
     productoEditar,
+    setProductoEditar,
     productoAEliminar,
+    setProductoAEliminar,
     manejoCambioInput,
     manejoCambioArchivo,
     manejoCambioInputEdicion,
     manejoCambioArchivoActualizar,
     agregarProducto,
     actualizarProducto,
-    eliminarProducto
-  } = useProductos();
-
-  const [productosFiltrados, setProductosFiltrados] = useState([]);
+    eliminarProducto,
+  } = useProductos(notificarAlUsuario);
 
   const [categorias, setCategorias] = useState([]);
-  const [textoBusqueda, setTextoBusqueda] = useState("");
-  const [cargando, setCargando] = useState(true);
-
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
-
-  const [toast, setToast] = useState({ mostrar: false, message: "", tipo: "" });
-
-  // ####################### REGISTRO DE CATEGORÍAS ###########################
   const [mostrarModalCategoria, setMostrarModalCategoria] = useState(false);
 
   const [nuevaCategoria, setNuevaCategoria] = useState({
@@ -53,61 +59,7 @@ const Producto = () => {
     descripcion_categoria: "",
   });
 
-  // En Producto.jsx, debajo de manejoCambioInput del producto
-  const manejoCambioInputCategoria = (e) => {
-    const { name, value } = e.target;
-    setNuevaCategoria((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const agregarCategoriaDesdeProductos = async () => {
-    try {
-      // Validaciones...
-      const { data, error } = await supabase
-        .from("categorias")
-        .insert([{
-          nombre_categoria: nuevaCategoria.nombre_categoria,
-          descripcion_categoria: nuevaCategoria.descripcion_categoria,
-        }])
-        .select(); // Obtenemos el registro creado
-
-      if (error) throw error;
-
-      const categoriaCreada = data[0];
-
-      // 1. Refrescamos la lista de categorías del selector
-      await cargarCategorias();
-
-      // 2. 🪄 MAGIA: Marcamos la nueva categoría en el estado del producto
-      setNuevoProducto(prev => ({
-        ...prev,
-        categoria_producto: categoriaCreada.id_categoria
-      }));
-
-      // 3. Limpiamos y cerramos
-      setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
-      setMostrarModalCategoria(false);
-
-      setToast({ mostrar: true, message: "Categoría creada y seleccionada", tipo: "exito" });
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  
-  useEffect(() => {
-    cargarCategorias();
-  }, []);
-
-
-  
-
-
-
-  // ############################Paginación###################
+  // 4. Lógica de Paginación local de la vista
   const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
   const [paginaActual, establcerPaginaActual] = useState(1);
 
@@ -116,9 +68,81 @@ const Producto = () => {
     paginaActual * registrosPorPagina
   );
 
-  //############################Generar PDF de producto########################
+  const abrirModalEdicion = (producto) => {
+    setProductoEditar(producto);
+    setMostrarModalEdicion(true);
+  };
 
-  // Función auxiliar para convertir URL a Base64
+  const abrirModalEliminacion = (producto) => {
+    setProductoAEliminar(producto);
+    setMostrarModalEliminacion(true);
+  };
+
+  const manejarBusqueda = (e) => {
+    setTextoBusqueda(e.target.value);
+  };
+
+
+  const cargarCategorias = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categorias")
+        .select("*")
+        .order("id_categoria", { ascending: true });
+      if (error) throw error;
+      setCategorias(data || []);
+    } catch (err) {
+      console.error("Error al cargar categorías:", err);
+    }
+  };
+
+  const manejoCambioInputCategoria = (e) => {
+    const { name, value } = e.target;
+    setNuevaCategoria((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const agregarCategoriaDesdeProductos = async () => {
+    if (!nuevaCategoria.nombre_categoria.trim()) {
+      notificarAlUsuario("El nombre de la categoría es obligatorio", "advertencia");
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("categorias")
+        .insert([{
+          nombre_categoria: nuevaCategoria.nombre_categoria,
+          descripcion_categoria: nuevaCategoria.descripcion_categoria,
+        }])
+        .select();
+
+      if (error) throw error;
+
+      const categoriaCreada = data[0];
+      await cargarCategorias();
+
+      // Vincula la nueva categoría directo al formulario del producto actual
+      setNuevoProducto(prev => ({
+        ...prev,
+        categoria_producto: categoriaCreada.id_categoria
+      }));
+
+      setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
+      setMostrarModalCategoria(false);
+      notificarAlUsuario("Categoría creada y seleccionada", "exito");
+    } catch (err) {
+      console.error(err);
+      notificarAlUsuario("Error al crear la categoría", "error");
+    }
+  };
+
+  useEffect(() => {
+    cargarCategorias();
+  }, []);
+
+  // ==========================================================================
+  // GENERADOR DE REPORTES PDF
+  // ==========================================================================
+
   const getBase64ImageFromURL = (url) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -137,20 +161,15 @@ const Producto = () => {
     });
   };
 
-  // Versión mejorada con imagen incluida
   const generarPDFProducto = async (producto) => {
     const doc = new jsPDF();
-
-    // Título
     doc.setFontSize(18);
     doc.setTextColor(40);
     doc.text("REPORTE DETALLADO DE PRODUCTO", 14, 20);
 
-    // Línea decorativa
     doc.setLineWidth(0.5);
     doc.line(14, 25, 195, 25);
 
-    // Intentamos cargar la imagen si existe
     let imageData = null;
     if (producto.imagen_url) {
       try {
@@ -160,7 +179,6 @@ const Producto = () => {
       }
     }
 
-    // Información del producto en tabla
     autoTable(doc, {
       startY: 35,
       theme: 'striped',
@@ -172,32 +190,26 @@ const Producto = () => {
         ["Precio de Venta", `$${parseFloat(producto.precio_venta).toFixed(2)}`],
         ["Descripción", producto.descripcion_producto || "Sin descripción"],
       ],
-      headStyles: { fillColor: [41, 128, 185] }, // Un azul profesional
+      headStyles: { fillColor: [41, 128, 185] },
     });
 
-    // Si hay imagen, la añadimos después de la tabla
     if (imageData) {
       const finalY = doc.lastAutoTable.finalY + 10;
       doc.text("Imagen de referencia:", 14, finalY);
-      // addImage(datos, formato, x, y, ancho, alto)
       doc.addImage(imageData, "PNG", 14, finalY + 5, 50, 50);
     }
 
-    // Pie de página con fecha
     const fecha = new Date().toLocaleDateString();
     doc.setFontSize(10);
     doc.text(`Reporte generado el: ${fecha}`, 14, 285);
-
-    // Descargar
     doc.save(`Ficha_${producto.nombre_producto.replace(/\s+/g, '_')}.pdf`);
   };
 
-  //###########################################################
-
-
+  // ==========================================================================
+  // RENDERIZADO INTERFAZ DE USUARIO
+  // ==========================================================================
   return (
     <Container className="mt-3">
-
       <Row className="align-items-center mb-3">
         <Col className="d-flex align-center mb-3">
           <h3 className="mb-0">
@@ -205,10 +217,10 @@ const Producto = () => {
             Productos
           </h3>
         </Col>
-
-        <Col xs={3} sm={5} md={5} lg={5} className="text-end">
+        <Col xs={6} sm={5} md={5} lg={5} className="text-end">
           <Button onClick={() => setMostrarModal(true)} size="md">
-            <span className="d-none d-sm-inline ms-2">Nuevo Producto</span>
+            <i className="bi bi-plus-circle me-2"></i>
+            <span className="d-none d-sm-inline">Nuevo Producto</span>
           </Button>
         </Col>
       </Row>
@@ -219,13 +231,13 @@ const Producto = () => {
         <Col md={6} lg={5}>
           <CuadroBusquedas
             textoBusqueda={textoBusqueda}
-            manejarCambioBusqueda={manejarBusqueda}
+            conversorFiltro={manejarBusqueda}
             placeholder="Buscar por nombre, descripción o precio..."
           />
         </Col>
       </Row>
 
-      {/* Mensaje de no coincidencias solo cuando hay búsqueda y no hay resultados */}
+      {/* Mensaje de no coincidencias en la búsqueda */}
       {!cargando && textoBusqueda.trim() && productosFiltrados.length === 0 && (
         <Row className="mb-4">
           <Col>
@@ -237,16 +249,14 @@ const Producto = () => {
         </Row>
       )}
 
-
-      { /* Modales */}
-
+      {/* ==================== CAPA DE VENTANAS MODALES ==================== */}
       <ModalRegistroProducto
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
         nuevoProducto={nuevoProducto}
         manejoCambioinput={manejoCambioInput}
         manejoCambioArcvhivo={manejoCambioArchivo}
-        agregarProducto={agregarProducto}
+        agregarProducto={() => agregarProducto(() => setMostrarModal(false))}
         categorias={categorias}
         setMostrarModalCategoria={setMostrarModalCategoria}
       />
@@ -264,15 +274,15 @@ const Producto = () => {
         setMostrarModalEdicion={setMostrarModalEdicion}
         productoEditar={productoEditar}
         manejoCambioInputEdicion={manejoCambioInputEdicion}
-        manejoCambioArchivoActualizar={manejoCambioArcvhivoActualizar}
-        actualizarProducto={actualizarProducto}
+        manejoCambioArchivoActualizar={manejoCambioArchivoActualizar}
+        actualizarProducto={() => actualizarProducto(() => setMostrarModalEdicion(false))}
         categorias={categorias}
       />
 
       <ModalEliminacionProducto
         mostrarModalEliminacion={mostrarModalEliminacion}
         setMostrarModalEliminacion={setMostrarModalEliminacion}
-        eliminarProducto={eliminarProducto}
+        eliminarProducto={() => eliminarProducto(() => setMostrarModalEliminacion(false))}
         producto={productoAEliminar}
       />
 
@@ -283,9 +293,8 @@ const Producto = () => {
         onClose={() => setToast({ ...toast, mostrar: false })}
       />
 
-
-      {/* Sin registros */}
-      {!cargando && productos.length === 0 && (
+      {/* Mensaje de base de datos vacía */}
+      {!cargando && productosFiltrados.length === 0 && !textoBusqueda && (
         <Row className="text-center my-5">
           <Col>
             <p className="text-muted fs-5">No hay productos registrados todavía.</p>
@@ -293,12 +302,12 @@ const Producto = () => {
         </Row>
       )}
 
-
-      {/* Lista de categorías filtratarjetas-categorias */}
+      {/* RENDERIZADO ADAPTATIVO (Tablas o Tarjetas móviles) */}
       {!cargando && productosFiltrados.length > 0 && (
         <>
           <Row>
-            <Col xs={12} sm={12} md={12} className="d-lg-none">
+            {/* Vista Móvil y Tablets */}
+            <Col xs={12} className="d-lg-none">
               <TarjetasProductos
                 productos={productosPaginadas}
                 abrirModalEdicion={abrirModalEdicion}
@@ -306,10 +315,11 @@ const Producto = () => {
                 generarPDFProducto={generarPDFProducto}
               />
             </Col>
+            {/* Vista Escritorio Lg en adelante */}
             <Col lg={12} className="d-none d-lg-block">
               <TablaProductos
                 productos={productosPaginadas}
-                abrirModalEdicion={abrirModalEdicion} 
+                abrirModalEdicion={abrirModalEdicion}
                 abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFProducto={generarPDFProducto}
               />
