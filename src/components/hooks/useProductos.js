@@ -7,7 +7,7 @@ import { productoServicio } from "../../services/productoServicio"
  * * @param {Function} notificar - Función callback para disparar alertas/Toasts en la UI (recibe: mensaje, tipo).
  * @returns {Object} Estados y manejadores de eventos listos para ser consumidos por la vista JSX.
  */
-export const useProdutos = (notificar) => {
+export const useProductos = (notificar) => {
 
   const [productos, setProductos] = useState([]);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
@@ -227,3 +227,5 @@ export const useProdutos = (notificar) => {
     recargarProductos: cargarProductos
   };
 };
+
+export default useProductos;
