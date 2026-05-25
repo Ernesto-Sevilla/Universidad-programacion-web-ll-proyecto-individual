@@ -231,7 +231,7 @@ const Producto = () => {
         <Col md={6} lg={5}>
           <CuadroBusquedas
             textoBusqueda={textoBusqueda}
-            conversorFiltro={manejarBusqueda}
+            manejarCambioBusqueda={manejarBusqueda}
             placeholder="Buscar por nombre, descripción o precio..."
           />
         </Col>
