@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
-import { supabase } from "../database/supabaseconfig";
+import { useEmpleados } from "../components/hooks/useEmpleados";
 
 import ModalRegistroEmpleado from "../components/empleados/ModalRegistroEmpleado";
 import ModalEdicionEmpleado from "../components/empleados/ModalEdicionEmpleado";
@@ -9,175 +9,48 @@ import TarjetaEmpleado from "../components/empleados/TarjetaEmpleados";
 import NotificacionOperacion from "../components/NotificationOperation";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 
+/**
+ * Componente de Vista principal para la gestión de la interfaz de Empleados.
+ */
 const Empleados = () => {
-  const [empleados, setEmpleados] = useState([]);
-  const [empleadosFiltrados, setEmpleadosFiltrados] = useState([]);
-  const [textoBusqueda, setTextoBusqueda] = useState("");
-  const [cargando, setCargando] = useState(true);   // ← Estado de carga inicial
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
-
+  // Estado local exclusivo para el comportamiento visual de la notificación (Toast)
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
 
-  const [nuevoEmpleado, setNuevoEmpleado] = useState({
-    nombre_empleado: "",
-    apellido_empleado: "",
-    celular: "",
-    pin: "",
-    email: "",
-    password: "",
-    tipo_empleado: "",
-  });
-
-  const [empleadoEditar, setEmpleadoEditar] = useState({
-    id_empleado: "",
-    nombre_empleado: "",
-    apellido_empleado: "",
-    celular: "",
-    pin: "",
-    email: "",
-    tipo_empleado: "",
-  });
-
-  // Cargar empleados
-  const cargarEmpleados = async () => {
-    try {
-      setCargando(true);
-      const { data, error } = await supabase
-        .from("empleados")
-        .select("*")
-        .order("id_empleado", { ascending: true });
-
-      if (error) {
-        setToast({ mostrar: true, mensaje: "Error al cargar empleados", tipo: "error" });
-        return;
-      }
-      setEmpleados(data || []);
-      setEmpleadosFiltrados(data || []);
-    } catch (err) {
-      setToast({ mostrar: true, mensaje: "Error inesperado al cargar empleados", tipo: "error" });
-    } finally {
-      setCargando(false);
-    }
+  /**
+   * Inyecta de manera segura el estado del toast desde el controlador reactivo.
+   * @param {string} mensaje 
+   * @param {string} tipo 
+   */
+  const manejarNotificaciones = (mensaje, tipo) => {
+    setToast({ mostrar: true, mensaje, tipo });
   };
 
-  useEffect(() => {
-    cargarEmpleados();
-  }, []);
-
-  // Filtrado
-  useEffect(() => {
-    if (!textoBusqueda.trim()) {
-      setEmpleadosFiltrados(empleados);
-    } else {
-      const texto = textoBusqueda.toLowerCase().trim();
-      const filtrados = empleados.filter(emp =>
-        `${emp.nombre_empleado} ${emp.apellido_empleado} ${emp.email || ""} ${emp.tipo_empleado || ""}`
-          .toLowerCase().includes(texto)
-      );
-      setEmpleadosFiltrados(filtrados);
-    }
-  }, [textoBusqueda, empleados]);
-
-  const agregarEmpleado = async () => {
-    if (!nuevoEmpleado.nombre_empleado || !nuevoEmpleado.apellido_empleado ||
-        !nuevoEmpleado.email || !nuevoEmpleado.password || !nuevoEmpleado.tipo_empleado) {
-      setToast({ mostrar: true, mensaje: "Los campos Nombre, Apellido, Email, Contraseña y Rol son obligatorios", tipo: "advertencia" });
-      return;
-    }
-
-    try {
-      setMostrarModal(false);
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: nuevoEmpleado.email,
-        password: nuevoEmpleado.password,
-        options: {
-          data: {
-            nombre: nuevoEmpleado.nombre_empleado,
-            apellido: nuevoEmpleado.apellido_empleado,
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      const { error: dbError } = await supabase.from("empleados").insert([{
-        nombre_empleado: nuevoEmpleado.nombre_empleado,
-        apellido_empleado: nuevoEmpleado.apellido_empleado,
-        celular: nuevoEmpleado.celular,
-        pin: nuevoEmpleado.pin,
-        email: nuevoEmpleado.email,
-        tipo_empleado: nuevoEmpleado.tipo_empleado,
-      }]);
-
-      if (dbError) throw dbError;
-
-      await cargarEmpleados();
-      setNuevoEmpleado({ nombre_empleado: "", apellido_empleado: "", celular: "", pin: "", email: "", password: "", tipo_empleado: "" });
-
-      setToast({
-        mostrar: true,
-        mensaje: `Empleado ${nuevoEmpleado.nombre_empleado} registrado correctamente`,
-        tipo: "exito"
-      });
-    } catch (err) {
-      console.error(err);
-      setToast({ mostrar: true, mensaje: err.message || "Error al registrar empleado", tipo: "error" });
-    }
-  };
-
-  const actualizarEmpleado = async () => {
-    if (!empleadoEditar.nombre_empleado || !empleadoEditar.apellido_empleado ||
-        !empleadoEditar.tipo_empleado) {
-      setToast({ mostrar: true, mensaje: "Nombre, Apellido y Rol son obligatorios", tipo: "advertencia" });
-      return;
-    }
-
-    try {
-      setMostrarModalEdicion(false);
-      const { error } = await supabase
-        .from("empleados")
-        .update({
-          nombre_empleado: empleadoEditar.nombre_empleado,
-          apellido_empleado: empleadoEditar.apellido_empleado,
-          celular: empleadoEditar.celular,
-          pin: empleadoEditar.pin,
-          tipo_empleado: empleadoEditar.tipo_empleado,
-        })
-        .eq("id_empleado", empleadoEditar.id_empleado);
-
-      if (error) throw error;
-
-      await cargarEmpleados();
-      setToast({
-        mostrar: true,
-        mensaje: `Empleado ${empleadoEditar.nombre_empleado} actualizado`,
-        tipo: "exito"
-      });
-    } catch (err) {
-      setToast({ mostrar: true, mensaje: "Error al actualizar empleado", tipo: "error" });
-    }
-  };
-
-  const abrirModalEdicion = (empleado) => {
-    setEmpleadoEditar({
-      id_empleado: empleado.id_empleado,
-      nombre_empleado: empleado.nombre_empleado,
-      apellido_empleado: empleado.apellido_empleado,
-      celular: empleado.celular || "",
-      pin: empleado.pin || "",
-      email: empleado.email || "",
-      tipo_empleado: empleado.tipo_empleado,
-    });
-    setMostrarModalEdicion(true);
-  };
+  // Consumo del Hook Controlador pasándole el puente de notificaciones
+  const {
+    empleadosFiltrados,
+    textoBusqueda,
+    setTextoBusqueda,
+    cargando,
+    mostrarModal,
+    setMostrarModal,
+    mostrarModalEdicion,
+    setMostrarModalEdicion,
+    nuevoEmpleado,
+    setNuevoEmpleado,
+    empleadoEditar,
+    setEmpleadoEditar,
+    agregarEmpleado,
+    actualizarEmpleado,
+    abrirModalEdicion,
+  } = useEmpleados(manejarNotificaciones);
 
   return (
     <Container className="mt-3">
       <Row className="align-items-center mb-3">
         <Col>
-          <h3><i className="bi-person-badge-fill me-2"></i>Empleados</h3>
+          <h3>
+            <i className="bi-person-badge-fill me-2"></i>Empleados
+          </h3>
         </Col>
         <Col className="text-end">
           <Button onClick={() => setMostrarModal(true)}>
@@ -195,21 +68,19 @@ const Empleados = () => {
         </Col>
       </Row>
 
-      {/* Spinner de carga inicial */}
       {cargando && (
         <Row className="text-center my-5">
           <Col>
-            <Spinner animation="border" variant="success" size="lg" />
+            <Spinner animation="border" size="lg" variant="success" />
             <p className="mt-3 text-muted">Cargando empleados...</p>
           </Col>
         </Row>
       )}
 
-      {/* Alert cuando no hay coincidencias en la búsqueda */}
       {!cargando && textoBusqueda.trim() && empleadosFiltrados.length === 0 && (
         <Row className="mb-4">
           <Col>
-            <Alert variant="info" className="text-center">
+            <Alert className="text-center" variant="info">
               <i className="bi bi-info-circle me-2"></i>
               No se encontraron empleados que coincidan con "{textoBusqueda}".
             </Alert>
@@ -217,16 +88,15 @@ const Empleados = () => {
         </Row>
       )}
 
-      {/* Mostrar tabla o tarjetas solo cuando hay resultados y ya cargó */}
       {!cargando && empleadosFiltrados.length > 0 && (
         <Row>
-          <Col xs={12} className="d-lg-none">
+          <Col className="d-lg-none" xs={12}>
             <TarjetaEmpleado
               empleados={empleadosFiltrados}
               abrirModalEdicion={abrirModalEdicion}
             />
           </Col>
-          <Col lg={12} className="d-none d-lg-block">
+          <Col className="d-none d-lg-block" lg={12}>
             <TablaEmpleados
               empleados={empleadosFiltrados}
               abrirModalEdicion={abrirModalEdicion}
@@ -235,7 +105,7 @@ const Empleados = () => {
         </Row>
       )}
 
-      {/* Modales */}
+      {/* Componentes modales de formularios */}
       <ModalRegistroEmpleado
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
@@ -252,6 +122,7 @@ const Empleados = () => {
         actualizarEmpleado={actualizarEmpleado}
       />
 
+      {/* Feedback flotante al operador */}
       <NotificacionOperacion
         mostrar={toast.mostrar}
         mensaje={toast.mensaje}
