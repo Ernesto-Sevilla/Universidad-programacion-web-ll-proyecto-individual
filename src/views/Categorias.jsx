@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Alert, Pagination } from "react-bootstrap";
-import { supabase } from "../database/supabaseconfig";
+import React, { useState } from "react";
+import { Container, Row, Col, Button, Alert } from "react-bootstrap";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useSeleccionTarjeta } from "../components/herramientas/tarjetas/useSeleccionTarjeta";
-import TarjetaBase from "../components/herramientas/tarjetas/TarjetaBase";
 
+// Custom Hooks de control
+import { useCategorias } from "../components/hooks/useCategorias";
+
+// Componentes Reutilizables e Hijos
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import ModalEdicionCategoria from "../components/categorias/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categorias/ModalEliminacionCategoria";
@@ -15,295 +16,67 @@ import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
 
+/**
+ * Función pura auxiliar para renderizar y exportar la ficha en PDF de la entidad.
+ * @param {Object} categoria - La categoría elegida para exportación.
+ */
+const generarPDFCategoria = (categoria) => {
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.text("Reporte de Categoría", 14, 20);
+  doc.line(14, 25, 195, 25);
+  doc.setFontSize(12);
+
+  autoTable(doc, {
+    startY: 35,
+    head: [["Campo", "Valor"]],
+    body: [
+      ["ID", categoria.id_categoria],
+      ["Nombre", categoria.nombre_categoria],
+      ["Descripción", categoria.descripcion_categoria],
+    ],
+  });
+
+  doc.save(`categoria_${categoria.id_categoria}.pdf`);
+};
+
 const Categorias = () => {
-
-  const [categorias, setCategorias] = useState([]);
-  const [cargando, setCargando] = useState(true);
-
-  const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
-
-  const [categoriaEditar, setCategoriaEditar] = useState({
-    nombre_categoria: "",
-    descripcion_categoria: ""
-  });
-
-  const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
-
-  const [categoriaAEliminar, setCategoriaAEliminar] = useState({
-    id_categoria: "",
-  });
-
+  // Estado local único para las alertas toast (requerido por el controlador)
   const [toast, setToast] = useState({ mostrar: false, message: "", tipo: "" });
-  const [mostrarModal, setMostrarModal] = useState(false);
 
-  const [nuevaCategoria, setNuevaCategoria] = useState({
-    nombre_categoria: "",
-    descripcion_categoria: "",
-  });
-
-  // ##################### BUSQUEDA ####################
-  const [textoBusqueda, setTextoBusqueda] = useState("");
-  const [categoriasFiltradas, setCategoriasFiltradas] = useState([]);
-
-  const manejarBusqueda = (e) => {
-    setTextoBusqueda(e.target.value);
-  };
-
-  useEffect(() => {
-    if (!textoBusqueda.trim()) {
-      setCategoriasFiltradas(categorias);
-    } else {
-      const textoLower = textoBusqueda.toLowerCase().trim();
-      const filtradas = categorias.filter(
-        (cat) =>
-          cat.nombre_categoria.toLowerCase().includes(textoLower) ||
-          cat.descripcion_categoria && cat.descripcion_categoria.toLowerCase().includes(textoLower)
-      );
-      setCategoriasFiltradas(filtradas);
-    }
-  }, [textoBusqueda, categorias]);
-  // ####################################################
-
-  // ###################### GENERAR PDF ######################
-  const generarPDFCategoria = (categoria) => {
-
-    const doc = new jsPDF();
-
-    // Título
-    doc.setFontSize(18);
-    doc.text("Reporte de Categoría", 14, 20);
-
-    // Línea decorativa
-    doc.line(14, 25, 195, 25);
-
-    // Información de la categoría
-    doc.setFontSize(12);
-
-    autoTable(doc, {
-      startY: 35,
-      head: [["Campo", "Valor"]],
-      body: [
-        ["ID", categoria.id_categoria],
-        ["Nombre", categoria.nombre_categoria],
-        ["Descripción", categoria.descripcion_categoria],
-      ],
-    });
-
-    // Descargar PDF
-    doc.save(`categoria_${categoria.id_categoria}.pdf`);
-  };
-
-  // ############################Paginación###################
-  const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
-  const [paginaActual, establcerPaginaActual] = useState(1);
-
-  const categoriasPaginadas = categoriasFiltradas.slice(
-    (paginaActual - 1) * registrosPorPagina,
-    paginaActual * registrosPorPagina
-  );
-
-
-  //###########################################################
-  const manejoCambioInput = (e) => {
-    const { name, value } = e.target;
-    setNuevaCategoria((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const abrirModalEdicion = (categoria) => {
-    setCategoriaEditar({
-      id_categoria: categoria.id_categoria, // Asegúrate que coincida con el nombre en DB
-      nombre_categoria: categoria.nombre_categoria,
-      descripcion_categoria: categoria.descripcion_categoria,
-    });
-    setMostrarModalEdicion(true); // Ahora sí abrimos el modal
-  };
-
-  const abrirModalEliminacion = (categoria) => {
-    setCategoriaAEliminar(categoria);
-    setMostrarModalEliminacion(true); // Ahora sí abrimos el modal
-  };
-
-  const manejoCambioInputEdicion = (e) => {
-    const { name, value } = e.target;
-    setCategoriaEditar((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // 2. Función para traer los datos
-  const cargarCategorias = async () => {
-    try {
-      setCargando(true);
-      const { data, error } = await supabase
-        .from("categorias")
-        .select("*")
-        .order("id_categoria", { ascending: true }); // Usando el nombre correcto
-
-      if (error) throw error;
-      setCategorias(data || []);
-    } catch (err) {
-      console.error("Error:", err.message);
-    } finally {
-      setCargando(false); // ¡Esto hace que la tabla aparezca!
-    }
-  };
-
-  const actualizarCategoria = async () => {
-    try {
-      if (
-        !categoriaEditar.nombre_categoria.trim() ||
-        !categoriaEditar.descripcion_categoria.trim()
-      ) {
-        setToast({
-          mostrar: true,
-          message: "Se debe de rellenar todos los campos.",
-          tipo: "advertencia",
-        });
-        return;
-      }
-
-      setMostrarModalEdicion(false);
-
-      const { error } = await supabase
-        .from("categorias")
-        .update({
-          nombre_categoria: categoriaEditar.nombre_categoria,
-          descripcion_categoria: categoriaEditar.descripcion_categoria,
-        })
-        .eq("id_categoria", categoriaEditar.id_categoria);
-
-      if (error) {
-        console.error("Error al actualizar categorías: ", error.message);
-        setToast({
-          mostrar: true,
-          message: `Error al actualizar la categoría: ${categoriaEditar.nombre_categoria}.`,
-          tipo: "error",
-        });
-        return;
-      }
-
-      await cargarCategorias();
-
-      setToast({
-        mostrar: true,
-        message: `La categoría ${categoriaEditar.nombre_categoria} actualizada exitosamente.`,
-        tipo: "exito",
-      });
-
-    } catch (err) {
-      setToast({
-        mostrar: true,
-        message: "Error inesperado al actualizar la categoría.",
-        tipo: "error",
-      });
-      console.error("Excepción al actualizar la categoría: ", err.message);
-    }
-  };
-
-  // 3. Ejecutar al cargar la página
-  useEffect(() => {
-    cargarCategorias();
-  }, []);
-
-  const agregarCategoria = async () => {
-    try {
-      if (
-        !nuevaCategoria.nombre_categoria.trim() ||
-        !nuevaCategoria.descripcion_categoria.trim()
-      ) {
-        setToast({
-          mostrar: true,
-          message: "Debe llenar todos los campos.",
-          tipo: "advertencia",
-        });
-        return;
-      }
-
-      const { error } = await supabase.from("categorias").insert([
-        {
-          nombre_categoria: nuevaCategoria.nombre_categoria,
-          descripcion_categoria: nuevaCategoria.descripcion_categoria,
-        },
-      ]);
-
-      if (error) {
-        console.error("Error al agregar categoría:", error.message);
-        setToast({
-          mostrar: true,
-          message: "Error al registrar categoría.",
-          tipo: "error",
-        });
-        return;
-      }
-
-      // Éxito
-      setToast({
-        mostrar: true,
-        message: `Categoria "${nuevaCategoria.nombre_categoria}" registrada exitosamente.`,
-        tipo: "exito",
-      });
-
-      // Limpiar formulario y cerrar modal
-      await cargarCategorias(); // Recargar categorías para mostrar la nueva
-      setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
-      setMostrarModal(false);
-
-    } catch (err) {
-      console.error("Excepción al agregar categoría:", err.message);
-      setToast({
-        mostrar: true,
-        message: "Error inesperado al registrar categoría.",
-        tipo: "error",
-      });
-    }
-  };
-
-
-  const eliminarCategoria = async () => {
-    if (!categoriaAEliminar) return;
-
-    try {
-      setMostrarModalEliminacion(false);
-
-      const { error } = await supabase
-        .from("categorias")
-        .delete()
-        .eq("id_categoria", categoriaAEliminar.id_categoria);
-
-      if (error) {
-        console.error("Error al eliminar categoria: ", error.message);
-        setToast({
-          mostrar: true,
-          message: `Error al eliminar la categoría ${categoriaAEliminar.nombre_categoria}.`,
-          tipo: "error",
-        });
-        return;
-      }
-
-      await cargarCategorias();
-      setToast({
-        mostrar: true,
-        message: `Categoría ${categoriaAEliminar.nombre_categoria} eliminada exiosamente.`,
-        tipo: "exito",
-      });
-    } catch (err) {
-      setToast({
-        mostrar: true,
-        message: "Error inesperado al eliminar categoría.",
-        tipo: "error",
-      });
-      console.error("Excepción al eliminar categoría: ", err.message);
-    }
-  };
+  // Desestructuración limpia de toda la lógica inyectada por el Custom Hook controlador
+  const {
+    categorias,
+    categoriasFiltradas,
+    categoriasPaginadas,
+    cargando,
+    textoBusqueda,
+    manejarCambioBusqueda,
+    mostrarModal,
+    setMostrarModal,
+    nuevaCategoria,
+    manejoCambioInput,
+    agregarCategoria,
+    mostrarModalEdicion,
+    setMostrarModalEdicion,
+    categoriaEditar,
+    manejoCambioInputEdicion,
+    actualizarCategoria,
+    abrirModalEdicion,
+    mostrarModalEliminacion,
+    setMostrarModalEliminacion,
+    categoriaAEliminar,
+    eliminarCategoria,
+    abrirModalEliminacion,
+    registrosPorPagina,
+    establecerRegistrosPorPagina,
+    paginaActual,
+    establcerPaginaActual,
+  } = useCategorias(setToast);
 
   return (
     <Container className="mt-3">
-
-      {/* Título y botón Nueva Categoría */}
+      {/* Título y Botón de creación superior */}
       <Row className="align-items-center mb-3">
         <Col xs={9} sm={7} md={7} lg={7} className="d-flex align-items-center">
           <h3 className="mb-0">
@@ -311,10 +84,7 @@ const Categorias = () => {
           </h3>
         </Col>
         <Col xs={3} sm={5} md={5} lg={5} className="text-end">
-          <Button
-            onClick={() => setMostrarModal(true)}
-            size="md"
-          >
+          <Button onClick={() => setMostrarModal(true)} size="md">
             <i className="bi-plus-lg"></i>
             <span className="d-none d-sm-inline ms-2">Nueva Categoría</span>
           </Button>
@@ -323,20 +93,18 @@ const Categorias = () => {
 
       <hr />
 
-      {/* #################################################### */}
-
-      {/* Cuadro de búsqueda debajo de la línea divisora*/}
+      {/* Control del Cuadro de Búsqueda */}
       <Row className="mb-4">
         <Col md={6} lg={5}>
           <CuadroBusquedas
             textoBusqueda={textoBusqueda}
-            manejarCambioBusqueda={manejarBusqueda}
+            manejarCambioBusqueda={manejarCambioBusqueda}
             placeholder="Buscar por nombre o descripción..."
           />
         </Col>
       </Row>
 
-      {/* Mensaje de no coincidencias solo cuando hay búsqueda y no hay resultados */}
+      {/* Alerta de no coincidencias filtradas */}
       {!cargando && textoBusqueda.trim() && categoriasFiltradas.length === 0 && (
         <Row className="mb-4">
           <Col>
@@ -348,7 +116,7 @@ const Categorias = () => {
         </Row>
       )}
 
-      {/* Modal de Registro */}
+      {/* Modales Modulares del Sistema */}
       <ModalRegistroCategoria
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
@@ -357,7 +125,6 @@ const Categorias = () => {
         agregarCategoria={agregarCategoria}
       />
 
-      {/* Modal de edición de categoría */}
       <ModalEdicionCategoria
         mostrarModalEdicion={mostrarModalEdicion}
         SetMostrarModalEdicion={setMostrarModalEdicion}
@@ -373,7 +140,7 @@ const Categorias = () => {
         categoria={categoriaAEliminar}
       />
 
-      {/* Sin registros */}
+      {/* Contenedor en caso de tabla vacía sin registros en base de datos */}
       {!cargando && categorias.length === 0 && (
         <Row className="text-center my-5">
           <Col>
@@ -382,7 +149,7 @@ const Categorias = () => {
         </Row>
       )}
 
-      {/* Notificación */}
+      {/* Alertas dinámicas Toast */}
       <NotificacionOperacion
         mostrar={toast.mostrar}
         message={toast.message}
@@ -390,11 +157,11 @@ const Categorias = () => {
         onClose={() => setToast({ ...toast, mostrar: false })}
       />
 
-
-      {/* Lista de categorías filtratarjetas-categorias */}
+      {/* Sección de Datos y Tablas Renderizadas */}
       {!cargando && categoriasFiltradas.length > 0 && (
         <>
           <Row>
+            {/* Responsivo: Tarjetas para Móviles / Tablets */}
             <Col xs={12} sm={12} md={12} className="d-lg-none">
               <TarjetaCategoria
                 categorias={categoriasPaginadas}
@@ -403,6 +170,7 @@ const Categorias = () => {
                 generarPDFCategoria={generarPDFCategoria}
               />
             </Col>
+            {/* Responsivo: Tabla estructurada para pantallas grandes */}
             <Col lg={12} className="d-none d-lg-block">
               <TablaCategorias
                 categorias={categoriasPaginadas}
@@ -413,6 +181,7 @@ const Categorias = () => {
             </Col>
           </Row>
 
+          {/* Componente de Navegación de Páginas */}
           <Paginacion
             registrosPorPagina={registrosPorPagina}
             totalRegistros={categoriasFiltradas.length}
@@ -425,4 +194,5 @@ const Categorias = () => {
     </Container>
   );
 };
+
 export default Categorias;
