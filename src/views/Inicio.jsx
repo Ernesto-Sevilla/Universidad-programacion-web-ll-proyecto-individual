@@ -11,6 +11,12 @@ import {
 } from "@/services";
 
 /**
+ * @constant {string[]} COLORES
+ * Paleta de colores en formato Hexadecimal para las secciones de las gráficas (PieChart y LineChart).
+ */
+const COLORES = ["#5e26b2", "#39ff95", "#ff6bc6", "#8b46ff", "#00d4ff", "#ffd93d"];
+
+/**
  * Componente Principal de la Pantalla de Inicio (Dashboard).
  * Muestra el resumen del negocio mediante métricas clave, gráficos interactivos
  * y permite la exportación de reportes a formatos de hoja de cálculo.
