@@ -1,4 +1,5 @@
 import { supabase } from "../database/supabaseconfig";
+import * as XLSX from 'xlsx';
 
 /**
  * Consulta las ventas crudas desde Supabase dentro de un rango de fechas.
@@ -109,4 +110,86 @@ export const procesarEstadisticas = (ventas, detalles) => {
     ventasPorHora,
     ventasPorCategoria
   };
+};
+
+/**
+ * Consulta las ventas y detalles de un rango de fechas y genera un archivo Excel (.xlsx)
+ * con múltiples hojas utilizando la distribución oficial de SheetJS.
+ * * @async
+ * @function generarReporteExcel
+ * @param {string} fechaDesde - Fecha de inicio del filtro (YYYY-MM-DD).
+ * @param {string} fechaHasta - Fecha de fin del filtro (YYYY-MM-DD).
+ * @returns {Promise<void>} Descarga de forma directa el archivo en el navegador.
+ */
+export const generarReporteExcel = async (fechaDesde, fechaHasta) => {
+  const inicioRango = `${fechaDesde} 00:00:00`;
+  const finRango = `${fechaHasta} 23:59:59`;
+
+  // 1. Obtener Ventas utilizando la lógica existente o extendida
+  const { data: ventas, error: errorVentas } = await supabase
+    .from("ventas")
+    .select(`
+      id_venta,
+      fecha_venta,
+      total,
+      metodo_pago,
+      id_empleado,
+      id_cliente
+    `)
+    .gte("fecha_venta", inicioRango)
+    .lte("fecha_venta", finRango)
+    .order("fecha_venta", { ascending: false });
+
+  if (errorVentas) throw errorVentas;
+
+  // 2. Obtener Detalles si existen ventas
+  const idsVentas = ventas?.map(v => v.id_venta) || [];
+  let detallesVenta = [];
+
+  if (idsVentas.length > 0) {
+    const { data: detalles, error: errorDetalles } = await supabase
+      .from("detalles_ventas")
+      .select(`
+        id_detalle,
+        id_venta,
+        cantidad,
+        precio_unitario,
+        subtotal,
+        id_producto,
+        productos (
+          nombre_producto,
+          categorias (nombre_categoria)
+        )
+      `)
+      .in("id_venta", idsVentas)
+      .order("id_venta");
+
+    if (errorDetalles) {
+      console.error("Error en detalles:", errorDetalles);
+    } else {
+      detallesVenta = detalles || [];
+    }
+  }
+
+  // 3. Construcción del Libro de Trabajo con SheetJS (XLSX)
+  const wb = XLSX.utils.book_new();
+
+  // Configuración de la Hoja de Ventas
+  if (ventas && ventas.length > 0) {
+    const wsVentas = XLSX.utils.json_to_sheet(ventas);
+    XLSX.utils.book_append_sheet(wb, wsVentas, "Ventas");
+  } else {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ Mensaje: "No hay ventas en este rango" }]), "Ventas");
+  }
+
+  // Configuración de la Hoja de Detalles
+  if (detallesVenta && detallesVenta.length > 0) {
+    const wsDetalles = XLSX.utils.json_to_sheet(detallesVenta);
+    XLSX.utils.book_append_sheet(wb, wsDetalles, "Detalles_Ventas");
+  } else {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ Mensaje: "No hay detalles de ventas" }]), "Detalles_Ventas");
+  }
+
+  // 4. Escritura y descarga del archivo
+  XLSX.writeFile(wb, `Reporte_Ventas_${fechaDesde}_a_${fechaHasta}.xlsx`);
 };

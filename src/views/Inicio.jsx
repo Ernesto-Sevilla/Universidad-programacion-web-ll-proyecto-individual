@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Card, Spinner, Form } from "react-bootstrap";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { supabase } from "../database/supabaseconfig"
-import * as XLSX from 'xlsx';
 
 // Importamos el servicio modular que acabamos de crear
 import { 
   fetchVentasPorRango, 
   fetchDetallesDeVentas, 
-  procesarEstadisticas 
+  procesarEstadisticas,
+  generarReporteExcel
 } from "@/services";
 
 /**
@@ -77,6 +76,25 @@ const Inicio = () => {
   useEffect(() => {
     cargarDatos(fechaDesde, fechaHasta);
   }, [fechaDesde, fechaHasta]);
+
+  /**
+   * Manejador de eventos para disparar la descarga del reporte en Excel
+   * aislando la lógica de generación en el servicio analítico.
+   * * @async
+   * @function descargarExcel
+   * @returns {Promise<void>}
+   */
+  const descargarExcel = async () => {
+    try {
+      setCargando(true);
+      await generarReporteExcel(fechaDesde, fechaHasta);
+    } catch (err) {
+      console.error("Error generando Excel:", err);
+      alert("Error al generar el Excel. Revisa la consola.");
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <Container className="mt-3">
