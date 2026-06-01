@@ -102,6 +102,15 @@ const Inicio = () => {
     }
   };
 
+  if (cargando) {
+    return (
+      <Container className="text-center mt-5">
+        <Spinner animation="border" variant="primary" size="lg" />
+        <p className="mt-3">Cargando estadísticas...</p>
+      </Container>
+    );
+  }
+  
   return (
     <Container className="mt-3">
       <Row className="align-items-center">
