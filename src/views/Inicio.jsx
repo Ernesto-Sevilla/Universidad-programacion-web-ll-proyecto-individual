@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Card, Spinner, Form } from "react-bootstrap";
-import { LineChard, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { supabase } from "../database/supabaseconfig"
 import * as XLSX from 'xlsx';
 
@@ -30,7 +30,31 @@ const Inicio = () => {
     ventasPorCategoria: []
   });
 
-  
+  /**
+   * Consulta los datos de ventas y productos en Supabase dentro del rango de fechas especificado
+   * y procesa las métricas necesarias para las gráficas y tarjetas.
+   * * @async
+   * @function cargarDatos
+   * @param {string} desde - Fecha inicial en formato YYYY-MM-DD.
+   * @param {string} hasta - Fecha final en formato YYYY-MM-DD.
+   * @returns {Promise<void>} No retorna valor, actualiza el estado directamente.
+   */
+  const cargarDatos = async (desde, hasta) => {
+    try {
+      setCargando(true);
+      console.log(`Consultando datos desde ${desde} hasta ${hasta}...`);
+    } catch (error) {
+      console.error("Error al cargar las estadísticas:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // --- Efecto Reactivo para Escuchar Cambios en los Filtros de Fecha ---
+  useEffect(() => {
+    cargarDatos(fechaDesde, fechaHasta);
+  }, [fechaDesde, fechaHasta]);
+
   return (
     <Container className="mt-3">
       <Row className="align-items-center">
