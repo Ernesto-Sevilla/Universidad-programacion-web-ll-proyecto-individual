@@ -4,6 +4,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { supabase } from "../database/supabaseconfig"
 import * as XLSX from 'xlsx';
 
+// Importamos el servicio modular que acabamos de crear
+import { 
+  fetchVentasPorRango, 
+  fetchDetallesDeVentas, 
+  procesarEstadisticas 
+} from "../services/analyticsService";
+
 /**
  * Componente Principal de la Pantalla de Inicio (Dashboard).
  * Muestra el resumen del negocio mediante métricas clave, gráficos interactivos
@@ -31,20 +38,36 @@ const Inicio = () => {
   });
 
   /**
-   * Consulta los datos de ventas y productos en Supabase dentro del rango de fechas especificado
-   * y procesa las métricas necesarias para las gráficas y tarjetas.
+   * Controlador para coordinar la carga asíncrona de datos de Supabase y
+   * disparar el procesamiento analítico de las métricas del dashboard.
    * * @async
    * @function cargarDatos
-   * @param {string} desde - Fecha inicial en formato YYYY-MM-DD.
-   * @param {string} hasta - Fecha final en formato YYYY-MM-DD.
-   * @returns {Promise<void>} No retorna valor, actualiza el estado directamente.
+   * @param {string} desde - Fecha inicial del filtro (YYYY-MM-DD).
+   * @param {string} hasta - Fecha final del filtro (YYYY-MM-DD).
+   * @returns {Promise<void>}
    */
   const cargarDatos = async (desde, hasta) => {
     try {
       setCargando(true);
-      console.log(`Consultando datos desde ${desde} hasta ${hasta}...`);
-    } catch (error) {
-      console.error("Error al cargar las estadísticas:", error);
+      
+      const inicioRango = `${desde} 00:00:00`;
+      const finRango = `${hasta} 23:59:59`;
+
+      // 1. Obtener ventas del rango
+      const ventas = await fetchVentasPorRango(inicioRango, finRango);
+      const idsVentas = ventas.map(v => v.id_venta);
+
+      // 2. Obtener detalles si existen ventas
+      const detalles = idsVentas.length > 0 ? await fetchDetallesDeVentas(idsVentas) : [];
+
+      // 3. Procesar las estadísticas a través del servicio analítico
+      const resultadoMetricas = procesarEstadisticas(ventas, detalles);
+
+      // 4. Guardar resultados en el estado local
+      setEstadisticas(resultadoMetricas);
+
+    } catch (err) {
+      console.error("Error al coordinar la carga de estadísticas:", err);
     } finally {
       setCargando(false);
     }
