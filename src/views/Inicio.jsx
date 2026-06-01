@@ -9,7 +9,7 @@ import {
   fetchVentasPorRango, 
   fetchDetallesDeVentas, 
   procesarEstadisticas 
-} from "../services/analyticsService";
+} from "@/services";
 
 /**
  * Componente Principal de la Pantalla de Inicio (Dashboard).
