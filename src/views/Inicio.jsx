@@ -3,9 +3,9 @@ import { Container, Row, Col, Button, Card, Spinner, Form } from "react-bootstra
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 // Importamos el servicio modular que acabamos de crear
-import { 
-  fetchVentasPorRango, 
-  fetchDetallesDeVentas, 
+import {
+  fetchVentasPorRango,
+  fetchDetallesDeVentas,
   procesarEstadisticas,
   generarReporteExcel
 } from "@/services";
@@ -29,7 +29,7 @@ const Inicio = () => {
   const [cargando, setCargando] = useState(true);
   const [fechaDesde, setFechaDesde] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Managua" }));
   const [fechaHasta, setFechaHasta] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Managua" }));
-  
+
   // --- Estado Centralizado de Métricas y Analítica ---
   const [estadisticas, setEstadisticas] = useState({
     totalVentas: 0,
@@ -54,7 +54,7 @@ const Inicio = () => {
   const cargarDatos = async (desde, hasta) => {
     try {
       setCargando(true);
-      
+
       const inicioRango = `${desde} 00:00:00`;
       const finRango = `${hasta} 23:59:59`;
 
@@ -110,14 +110,120 @@ const Inicio = () => {
       </Container>
     );
   }
-  
+
   return (
     <Container className="mt-3">
-      <Row className="align-items-center">
-        <Col>
-          <h2><i className="bi-house-fill me-2"></i> Inicio</h2>
-        </Col>
-      </Row>
+      <div className="mt-2">
+        <div className="mb-4">
+          <h2>Dashboard</h2>
+          <h6>Estadísticas del Negocio</h6>
+        </div>
+
+        {/* Controles de Filtros y Acciones */}
+        <Row className="mb-4">
+          <Col xs={6} md={3}>
+            <Form.Group>
+              <Form.Label>Desde</Form.Label>
+              <Form.Control type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} />
+            </Form.Group>
+          </Col>
+          <Col xs={6} md={3}>
+            <Form.Group>
+              <Form.Label>Hasta</Form.Label>
+              <Form.Control type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
+            </Form.Group>
+          </Col>
+          <Col md={3} className="d-flex align-items-end">
+            <Button variant="success" onClick={descargarExcel} className="mt-3 mt-md-0">
+              <i className="bi bi-file-earmark-excel me-2"></i>
+              Descargar Excel
+            </Button>
+          </Col>
+        </Row>
+
+        {/* Tarjetas Informativas de Métricas */}
+        <Row className="g-4 mb-5">
+          <Col md={6} lg={3}>
+            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #28a745, #34ce57)" }}>
+              <Card.Body>
+                <h5>Ventas Totales</h5>
+                <h2>C$ {estadisticas.totalVentas.toFixed(2)}</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={6} lg={3}>
+            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #0166d3, #3399ff)" }}>
+              <Card.Body>
+                <h5>Efectivo</h5>
+                <h2>C$ {estadisticas.ventasEfectivo.toFixed(2)}</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={6} lg={3}>
+            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #5ea5f1, #94c0ec)" }}>
+              <Card.Body>
+                <h5>Tarjeta</h5>
+                <h2>C$ {estadisticas.ventasTarjeta.toFixed(2)}</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={6} lg={3}>
+            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #e27d01, #ffa500)" }}>
+              <Card.Body>
+                <h5>Productos Vendidos</h5>
+                <h2>{estadisticas.productosVendidos}</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Bloque Gráfico de Recharts */}
+        <Row className="g-4">
+          {/* Gráfica Lineal de Tendencia */}
+          <Col lg={8}>
+            <Card className="shadow border-0">
+              <Card.Body>
+                <h5 className="mb-3">Ventas por Hora</h5>
+                <ResponsiveContainer width="100%" height={360}>
+                  <LineChart data={estadisticas.ventasPorHora}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="hora" />
+                    <YAxis tickFormatter={(v) => `C$${v}`} />
+                    <Tooltip formatter={(v) => [`C$ ${v}`, "Monto"]} />
+                    <Line type="monotone" dataKey="total" stroke="#5e26b2" strokeWidth={4} dot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* Gráfica de Pastel Categorizada */}
+          <Col lg={4}>
+            <Card className="shadow border-0">
+              <Card.Body>
+                <h5 className="mb-3">Ventas por Categoría</h5>
+                <ResponsiveContainer width="100%" height={360}>
+                  <PieChart>
+                    <Pie
+                      data={estadisticas.ventasPorCategoria.length > 0 ? estadisticas.ventasPorCategoria : [{ name: "Sin datos", value: 1 }]}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%" cy="50%"
+                      innerRadius={60} outerRadius={110}
+                      label
+                    >
+                      {estadisticas.ventasPorCategoria.map((_, i) => (
+                        <Cell key={`cell-${i}`} fill={COLORES[i % COLORES.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => `C$ ${v}`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </div>
     </Container>
   );
 };
