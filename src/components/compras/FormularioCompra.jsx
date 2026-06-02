@@ -42,7 +42,7 @@ export const FormularioCompra = ({
     e.preventDefault();
     if (!productoIdTemp || esSoloLectura) return;
 
-    const prod = productos.find((p) => p.producto_id === Number(productoIdTemp));
+    const prod = productos.find((p) => p.id_producto === Number(productoIdTemp));
     if (prod) {
       // Pasamos el producto y usamos su precio_compra (costo) para el detalle de la orden
       agregarDetalle(prod, Number(cantidadTemp));
@@ -196,8 +196,8 @@ export const FormularioCompra = ({
                       >
                         <option value="">-- Seleccione un artículo --</option>
                         {productos.map((p) => (
-                          <option key={p.producto_id} value={p.producto_id}>
-                            {p.nombre} - Costo: {formatearMoneda(p.precio_compra)} (Stock actual: {p.stock})
+                          <option key={p.id_producto} value={p.id_producto}>
+                            {p.nombre_producto} - Costo: {formatearMoneda(p.precio_compra)} (Stock actual: {p.stock})
                           </option>
                         ))}
                       </Form.Select>
@@ -257,9 +257,9 @@ export const FormularioCompra = ({
                   </tr>
                 ) : (
                   detalles.map((item) => (
-                    <tr key={item.producto_id}>
-                      <td>{item.producto_id}</td>
-                      <td className="fw-semibold text-dark">{item.nombre}</td>
+                    <tr key={item.id_producto}>
+                      <td>{item.id_producto}</td>
+                      <td className="fw-semibold text-dark">{item.nombre_producto}</td>
                       {/* Renderizamos utilizando el precio de costo de compra asignado */}
                       <td className="text-end">{formatearMoneda(item.precio)}</td>
                       <td className="text-center">
@@ -271,7 +271,7 @@ export const FormularioCompra = ({
                           min="1"
                           disabled={esSoloLectura}
                           value={item.cantidad}
-                          onChange={(e) => actualizarCantidad(item.producto_id, Number(e.target.value))}
+                          onChange={(e) => actualizarCantidad(item.id_producto, Number(e.target.value))}
                         />
                       </td>
                       <td className="text-end fw-bold text-secondary">
@@ -282,7 +282,7 @@ export const FormularioCompra = ({
                           <Button
                             variant="link"
                             className="text-danger p-0"
-                            onClick={() => eliminarDetalle(item.producto_id)}
+                            onClick={() => eliminarDetalle(item.id_producto)}
                           >
                             <i className="bi bi-trash-fill fs-5"></i>
                           </Button>
