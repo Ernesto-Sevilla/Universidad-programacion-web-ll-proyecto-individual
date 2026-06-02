@@ -8,3 +8,4 @@ export * from './clienteServicio.js';
 export * from './empleadoServicio.js';
 export * from './productoServicio.js';
 export * from './geminiService.js';
+export * from './compraServicio.js';
