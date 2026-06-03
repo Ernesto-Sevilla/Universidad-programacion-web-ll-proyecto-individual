@@ -131,6 +131,13 @@ const Encabezado = () => {
               <strong>Compras</strong>
             </Nav.Link>
 
+            <Nav.Link
+              onClick={() => manejarNavegacion("/dashboard")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-cart-check-fill me-2"></i> : null}
+              <strong>DashBoard</strong>
+            </Nav.Link>            
 
             <Nav.Link onClick={() => setMostrarChatIA(true)} className="text-white">
               <i className="bi bi-robot me-2"></i>

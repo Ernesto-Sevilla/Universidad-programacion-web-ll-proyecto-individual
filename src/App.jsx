@@ -13,6 +13,7 @@ import Pagina404 from "./views/Pagina404";
 import Empleados from './views/Empleados.jsx';
 import Clientes from './views/Clientes.jsx';
 import Compras from './views/Compras.jsx';
+import Dashboard from './views/DashBoard.jsx';
 
 import "./App.css";
 
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/empleados" element={<RutaProtegida><Empleados /></RutaProtegida>} />
           <Route path="/clientes" element={<RutaProtegida><Clientes /></RutaProtegida>} />
           <Route path="/compras" element={<RutaProtegida><Compras /></RutaProtegida>} />
+          <Route path="/dashboard" element={<RutaProtegida><Dashboard /></RutaProtegida>} />
 
           <Route path="*" element={<Pagina404 />} />
 
