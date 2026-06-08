@@ -3,3 +3,4 @@
  * Permite importar múltiples hooks desde una única ubicación limpia.
  */
 export * from './useCompras.js';
+export * from './useClipboard.js';
