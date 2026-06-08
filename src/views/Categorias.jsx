@@ -4,7 +4,9 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Custom Hooks de control
-import { useCategorias } from "../hooks/useCategorias";
+import { useCategorias, useClipboard } from "@/hooks";
+
+import { formatService } from "@/services";
 
 // Componentes Reutilizables e Hijos
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
@@ -73,6 +75,26 @@ const Categorias = () => {
     paginaActual,
     establcerPaginaActual,
   } = useCategorias(setToast);
+
+  /**
+   * Manejador intermedio para procesar el copiado de una categoría.
+   * Utiliza el formateador de servicios y despacha la acción técnica al portapapeles.
+   * @param {Object} categoria - Objeto con los atributos de la fila seleccionada.
+   */
+  const manejarCopiarCategoria = (categoria) => {
+    const textoEstructurado = formatService.categoriaParaPortapapeles(categoria);
+    copiarAlPortapapeles(
+      textoEstructurado,
+      `Categoría "${categoria.nombre_categoria}" copiada al portapapeles`
+    );
+  };
+
+  // Hook personalizado e independiente para la gestión del portapapeles global
+  const {
+    toast: toastClipboard,
+    copiarAlPortapapeles,
+    cerrarToast: cerrarToastClipboard
+  } = useClipboard();
 
   return (
     <Container className="mt-3">
@@ -157,6 +179,13 @@ const Categorias = () => {
         onClose={() => setToast({ ...toast, mostrar: false })}
       />
 
+      <NotificacionOperacion
+        mostrar={toastClipboard.mostrar}
+        message={toastClipboard.mensaje}
+        tipo={toastClipboard.tipo}
+        onClose={cerrarToastClipboard}
+      />
+
       {/* Sección de Datos y Tablas Renderizadas */}
       {!cargando && categoriasFiltradas.length > 0 && (
         <>
@@ -177,6 +206,7 @@ const Categorias = () => {
                 abrirModalEdicion={abrirModalEdicion}
                 abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFCategoria={generarPDFCategoria}
+                copiarCategoria={manejarCopiarCategoria}
               />
             </Col>
           </Row>
