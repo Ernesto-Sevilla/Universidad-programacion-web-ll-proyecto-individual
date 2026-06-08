@@ -3,7 +3,12 @@ import { Row, Col, Spinner, Button } from "react-bootstrap";
 import { useSeleccionTarjeta } from "../../components/herramientas/tarjetas/useSeleccionTarjeta";
 import TarjetaBase from "../herramientas/tarjetas/TarjetaBase";
 
-const TarjetaCategoria = ({ categorias, abrirModalEdicion, abrirModalEliminacion }) => {
+const TarjetaCategoria = ({ 
+  categorias, 
+  abrirModalEdicion, 
+  abrirModalEliminacion,
+  generarPDFCategoria, 
+}) => {
   const { idActivo, alternarActivo, cerrar } = useSeleccionTarjeta();
 
   if (!categorias || categorias.length === 0) {
@@ -29,6 +34,14 @@ const TarjetaCategoria = ({ categorias, abrirModalEdicion, abrirModalEliminacion
               </Button>
               <Button variant="outline-danger" size="sm" onClick={() => { abrirModalEliminacion(cat); cerrar(); }}>
                 <i className="bi bi-trash"></i>
+              </Button>
+              <Button 
+                variant="outline-primary" 
+                size="sm" 
+                onClick={() => { generarPDFCategoria(cat); cerrar(); }}
+                title="Generar PDF"
+              >
+                <i className="bi bi-file-earmark-pdf"></i>
               </Button>
             </>
           }
