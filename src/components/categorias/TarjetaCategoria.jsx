@@ -3,11 +3,12 @@ import { Row, Col, Spinner, Button } from "react-bootstrap";
 import { useSeleccionTarjeta } from "../../components/herramientas/tarjetas/useSeleccionTarjeta";
 import TarjetaBase from "../herramientas/tarjetas/TarjetaBase";
 
-const TarjetaCategoria = ({ 
-  categorias, 
-  abrirModalEdicion, 
+const TarjetaCategoria = ({
+  categorias,
+  abrirModalEdicion,
   abrirModalEliminacion,
-  generarPDFCategoria, 
+  generarPDFCategoria,
+  copiarCategoria
 }) => {
   const { idActivo, alternarActivo, cerrar } = useSeleccionTarjeta();
 
@@ -35,13 +36,21 @@ const TarjetaCategoria = ({
               <Button variant="outline-danger" size="sm" onClick={() => { abrirModalEliminacion(cat); cerrar(); }}>
                 <i className="bi bi-trash"></i>
               </Button>
-              <Button 
-                variant="outline-primary" 
-                size="sm" 
+              <Button
+                variant="outline-primary"
+                size="sm"
                 onClick={() => { generarPDFCategoria(cat); cerrar(); }}
                 title="Generar PDF"
               >
                 <i className="bi bi-file-earmark-pdf"></i>
+              </Button>
+              <Button
+                variant="outline-success"
+                size="sm"
+                onClick={() => { copiarCategoria(cat); cerrar(); }}
+                title="Copiar al portapapeles"
+              >
+                <i className="bi bi-clipboard"></i>
               </Button>
             </>
           }
