@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Custom Hooks controladores de capa intermedia
-import { useClientes } from "../components/hooks/useClientes";
+import { useClientes } from "@/hooks";
 
 // Componentes modulares e hijos del módulo de Clientes
 import ModalRegistroCliente from "../components/clientes/ModalRegistroCliente";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
-import { useEmpleados } from "../components/hooks/useEmpleados";
+import { useEmpleados } from "@/hooks";
 
 import ModalRegistroEmpleado from "../components/empleados/ModalRegistroEmpleado";
 import ModalEdicionEmpleado from "../components/empleados/ModalEdicionEmpleado";

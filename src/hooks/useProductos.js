@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { productoServicio } from "../../services/productoServicio"
+import { productoServicio } from "../services/productoServicio"
 
 /**
  * Custom Hook para gestionar el estado reactivo, filtrado y operaciones CRUD de productos.

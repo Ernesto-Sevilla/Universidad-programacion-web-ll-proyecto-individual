@@ -4,8 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Custom Hooks Controladores (Consumo e Inyección de dependencias)
-import { useProductos } from "../components/hooks/useProductos.js";
-import { useCategorias } from "../components/hooks/useCategorias.js"; // ¡Reutilización directa de lógica!
+import { useProductos, useCategorias } from "@/hooks";
 
 // Componentes Reutilizables de la Capa de Ventanas Modales
 import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";

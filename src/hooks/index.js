@@ -4,3 +4,7 @@
  */
 export * from './useCompras.js';
 export * from './useClipboard.js';
+export * from './useClientes.js';
+export * from './useEmpleados.js';
+export * from './useProductos.js';
+export * from './useCategorias.js';

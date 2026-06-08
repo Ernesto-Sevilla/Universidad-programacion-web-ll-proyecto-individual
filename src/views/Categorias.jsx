@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Custom Hooks de control
-import { useCategorias } from "../components/hooks/useCategorias";
+import { useCategorias } from "../hooks/useCategorias";
 
 // Componentes Reutilizables e Hijos
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";

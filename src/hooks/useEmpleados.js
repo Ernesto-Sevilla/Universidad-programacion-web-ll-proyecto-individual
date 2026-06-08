@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import empleadoServicio from "../../services/empleadoServicio";
+import empleadoServicio from "../services/empleadoServicio";
 
 /**
  * @callback NotificarCallback

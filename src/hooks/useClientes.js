@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { clienteServicio } from "../../services/clienteServicio";
+import { clienteServicio } from "../services/clienteServicio";
 
 /**
  * Estructura inicial limpia para un cliente nuevo.
