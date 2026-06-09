@@ -10,6 +10,8 @@ import {
   generarReporteExcel
 } from "@/services";
 
+import { usePDFGenerator } from "@/hooks";
+
 /**
  * @constant {string[]} COLORES
  * Paleta de colores en formato Hexadecimal para las secciones de las gráficas (PieChart y LineChart).
@@ -29,6 +31,8 @@ const Inicio = () => {
   const [cargando, setCargando] = useState(true);
   const [fechaDesde, setFechaDesde] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Managua" }));
   const [fechaHasta, setFechaHasta] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Managua" }));
+
+  const { generateDashboardPDF, isGenerating, error: errorPDF } = usePDFGenerator();
 
   // --- Estado Centralizado de Métricas y Analítica ---
   const [estadisticas, setEstadisticas] = useState({
@@ -111,6 +115,21 @@ const Inicio = () => {
     );
   }
 
+  const descargarPDF = async () => {
+    // Definimos el nombre dinámico del archivo usando el rango de fechas seleccionado
+    const nombreArchivo = `Reporte_Analitico_${fechaDesde}_a_${fechaHasta}.pdf`;
+    await generateDashboardPDF("area-reporte-visual", nombreArchivo);
+  };
+
+  if (cargando) {
+    return (
+      <Container className="text-center mt-5">
+        <Spinner animation="border" variant="primary" size="lg" />
+        <p className="mt-3">Cargando estadísticas...</p>
+      </Container>
+    );
+  }
+
   return (
     <Container className="mt-3">
       <div className="mt-2">
@@ -133,96 +152,129 @@ const Inicio = () => {
               <Form.Control type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
             </Form.Group>
           </Col>
-          <Col md={3} className="d-flex align-items-end">
-            <Button variant="success" onClick={descargarExcel} className="mt-3 mt-md-0">
+          
+          {/* Botones de Exportación agrupados */}
+          <Col md={6} className="d-flex align-items-end gap-2 mt-3 mt-md-0">
+            <Button variant="success" onClick={descargarExcel}>
               <i className="bi bi-file-earmark-excel me-2"></i>
-              Descargar Excel
+              Excel
+            </Button>
+            
+            {/* 4. Botón de Invocación PDF */}
+            <Button 
+              variant="danger" 
+              onClick={descargarPDF} 
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-file-earmark-pdf me-2"></i>
+                  Exportar PDF
+                </>
+              )}
             </Button>
           </Col>
         </Row>
 
-        {/* Tarjetas Informativas de Métricas */}
-        <Row className="g-4 mb-5">
-          <Col md={6} lg={3}>
-            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #28a745, #34ce57)" }}>
-              <Card.Body>
-                <h5>Ventas Totales</h5>
-                <h2>C$ {estadisticas.totalVentas.toFixed(2)}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={6} lg={3}>
-            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #0166d3, #3399ff)" }}>
-              <Card.Body>
-                <h5>Efectivo</h5>
-                <h2>C$ {estadisticas.ventasEfectivo.toFixed(2)}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={6} lg={3}>
-            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #5ea5f1, #94c0ec)" }}>
-              <Card.Body>
-                <h5>Tarjeta</h5>
-                <h2>C$ {estadisticas.ventasTarjeta.toFixed(2)}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={6} lg={3}>
-            <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #e27d01, #ffa500)" }}>
-              <Card.Body>
-                <h5>Productos Vendidos</h5>
-                <h2>{estadisticas.productosVendidos}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+        {/* Feedback visual si ocurre un error en la generación del binario */}
+        {errorPDF && (
+          <div className="alert alert-danger p-2" role="alert">
+            {errorPDF}
+          </div>
+        )}
 
-        {/* Bloque Gráfico de Recharts */}
-        <Row className="g-4">
-          {/* Gráfica Lineal de Tendencia */}
-          <Col lg={8}>
-            <Card className="shadow border-0">
-              <Card.Body>
-                <h5 className="mb-3">Ventas por Hora</h5>
-                <ResponsiveContainer width="100%" height={360}>
-                  <LineChart data={estadisticas.ventasPorHora}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="hora" />
-                    <YAxis tickFormatter={(v) => `C$${v}`} />
-                    <Tooltip formatter={(v) => [`C$ ${v}`, "Monto"]} />
-                    <Line type="monotone" dataKey="total" stroke="#5e26b2" strokeWidth={4} dot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card.Body>
-            </Card>
-          </Col>
+        {/* 5. CONTENEDOR DE CAPTURA ASOCIADO AL ID DEL HOOK */}
+        <div id="area-reporte-visual" className="p-2 bg-light rounded">
+          
+          {/* Tarjetas Informativas de Métricas */}
+          <Row className="g-4 mb-5">
+            <Col md={6} lg={3}>
+              <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #28a745, #34ce57)" }}>
+                <Card.Body>
+                  <h5>Ventas Totales</h5>
+                  <h2>C$ {estadisticas.totalVentas.toFixed(2)}</h2>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={6} lg={3}>
+              <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #0166d3, #3399ff)" }}>
+                <Card.Body>
+                  <h5>Efectivo</h5>
+                  <h2>C$ {estadisticas.ventasEfectivo.toFixed(2)}</h2>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={6} lg={3}>
+              <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #5ea5f1, #94c0ec)" }}>
+                <Card.Body>
+                  <h5>Tarjeta</h5>
+                  <h2>C$ {estadisticas.ventasTarjeta.toFixed(2)}</h2>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={6} lg={3}>
+              <Card className="h-100 text-white shadow border-0" style={{ background: "linear-gradient(135deg, #e27d01, #ffa500)" }}>
+                <Card.Body>
+                  <h5>Productos Vendidos</h5>
+                  <h2>{estadisticas.productosVendidos}</h2>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
-          {/* Gráfica de Pastel Categorizada */}
-          <Col lg={4}>
-            <Card className="shadow border-0">
-              <Card.Body>
-                <h5 className="mb-3">Ventas por Categoría</h5>
-                <ResponsiveContainer width="100%" height={360}>
-                  <PieChart>
-                    <Pie
-                      data={estadisticas.ventasPorCategoria.length > 0 ? estadisticas.ventasPorCategoria : [{ name: "Sin datos", value: 1 }]}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%" cy="50%"
-                      innerRadius={60} outerRadius={110}
-                      label
-                    >
-                      {estadisticas.ventasPorCategoria.map((_, i) => (
-                        <Cell key={`cell-${i}`} fill={COLORES[i % COLORES.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v) => `C$ ${v}`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+          {/* Bloque Gráfico de Recharts */}
+          <Row className="g-4">
+            {/* Gráfica Lineal de Tendencia */}
+            <Col lg={8}>
+              <Card className="shadow border-0">
+                <Card.Body>
+                  <h5 className="mb-3">Ventas por Hora</h5>
+                  <ResponsiveContainer width="100%" height={360}>
+                    <LineChart data={estadisticas.ventasPorHora}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hora" />
+                      <YAxis tickFormatter={(v) => `C$${v}`} />
+                      <Tooltip formatter={(v) => [`C$ ${v}`, "Monto"]} />
+                      <Line type="monotone" dataKey="total" stroke="#5e26b2" strokeWidth={4} dot={{ r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* Gráfica de Pastel Categorizada */}
+            <Col lg={4}>
+              <Card className="shadow border-0">
+                <Card.Body>
+                  <h5 className="mb-3">Ventas por Categoría</h5>
+                  <ResponsiveContainer width="100%" height={360}>
+                    <PieChart>
+                      <Pie
+                        data={estadisticas.ventasPorCategoria.length > 0 ? estadisticas.ventasPorCategoria : [{ name: "Sin datos", value: 1 }]}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%" cy="50%"
+                        innerRadius={60} outerRadius={110}
+                        label
+                      >
+                        {estadisticas.ventasPorCategoria.map((_, i) => (
+                          <Cell key={`cell-${i}`} fill={COLORES[i % COLORES.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v) => `C$ ${v}`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          
+        </div> {/* Fin area-reporte-visual */}
       </div>
     </Container>
   );
