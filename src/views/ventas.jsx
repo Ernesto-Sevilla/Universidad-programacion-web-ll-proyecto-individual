@@ -84,7 +84,7 @@ const Ventas = () => {
     // Verificamos la existencia de la subtabla inyectada por la Opción 1
     if (venta.detalles_ventas && venta.detalles_ventas.length > 0) {
       setDetalles(venta.detalles_ventas.map(d => ({
-        producto_id: d.producto_id,
+        id_producto: d.id_producto,
         nombre: d.productos?.nombre || "Producto", // Lee correctamente el JOIN de productos
         precio: Number(d.precio_unitario),
         cantidad: Number(d.cantidad)
@@ -107,14 +107,14 @@ const Ventas = () => {
   const agregarDetalle = (producto, cantidad) => {
     if (!producto || !cantidad) return;
     setDetalles(prev => {
-      const existe = prev.find(d => d.producto_id === producto.producto_id);
+      const existe = prev.find(d => d.id_producto === producto.id_producto);
       if (existe) {
         return prev.map(d =>
-          d.producto_id === producto.producto_id ? { ...d, cantidad: d.cantidad + cantidad } : d
+          d.id_producto === producto.id_producto ? { ...d, cantidad: d.cantidad + cantidad } : d
         );
       }
       return [...prev, {
-        producto_id: producto.producto_id,
+        id_producto: producto.id_producto,
         nombre: producto.nombre,
         precio: producto.precio_venta,
         amount: cantidad, // Alias de soporte si se requiere
@@ -124,13 +124,13 @@ const Ventas = () => {
   };
 
   const eliminarDetalle = (idProducto) => {
-    setDetalles(prev => prev.filter(d => d.producto_id !== idProducto));
+    setDetalles(prev => prev.filter(d => d.id_producto !== idProducto));
   };
 
   const actualizarCantidad = (idProducto, nuevaCantidad) => {
     if (nuevaCantidad < 1) return;
     setDetalles(prev => prev.map(d =>
-      d.producto_id === idProducto ? { ...d, cantidad: nuevaCantidad } : d
+      d.id_producto === idProducto ? { ...d, cantidad: nuevaCantidad } : d
     ));
   };
 

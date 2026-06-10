@@ -43,7 +43,7 @@ export const FormularioVenta = ({
         e.preventDefault();
         if (!productoIdTemp || esSoloLectura) return;
 
-        const prod = productos.find((p) => p.producto_id === Number(productoIdTemp));
+        const prod = productos.find((p) => p.id_producto === Number(productoIdTemp));
         if (prod) {
             agregarDetalle(prod, Number(cantidadTemp));
             // Resetear selectores temporales
@@ -208,7 +208,7 @@ export const FormularioVenta = ({
                                             >
                                                 <option value="">-- Seleccione un artículo --</option>
                                                 {productos.map((p) => (
-                                                    <option key={p.producto_id} value={p.producto_id}>
+                                                    <option key={p.id_producto} value={p.id_producto}>
                                                         {p.nombre} - {formatearMoneda(p.precio_venta)} (Stock: {p.stock})
                                                     </option>
                                                 ))}
@@ -269,8 +269,8 @@ export const FormularioVenta = ({
                                     </tr>
                                 ) : (
                                     detalles.map((item) => (
-                                        <tr key={item.producto_id}>
-                                            <td>{item.producto_id}</td>
+                                        <tr key={item.id_producto}>
+                                            <td>{item.id_producto}</td>
                                             <td className="fw-semibold text-dark">{item.nombre}</td>
                                             <td className="text-end">{formatearMoneda(item.precio)}</td>
                                             <td className="text-center">
@@ -282,7 +282,7 @@ export const FormularioVenta = ({
                                                     min="1"
                                                     disabled={esSoloLectura}
                                                     value={item.cantidad}
-                                                    onChange={(e) => actualizarCantidad(item.producto_id, Number(e.target.value))}
+                                                    onChange={(e) => actualizarCantidad(item.id_producto, Number(e.target.value))}
                                                 />
                                             </td>
                                             <td className="text-end fw-bold text-secondary">
@@ -293,7 +293,7 @@ export const FormularioVenta = ({
                                                     <Button
                                                         variant="link"
                                                         className="text-danger p-0"
-                                                        onClick={() => eliminarDetalle(item.producto_id)}
+                                                        onClick={() => eliminarDetalle(item.id_producto)}
                                                     >
                                                         <i className="bi bi-trash-fill fs-5"></i>
                                                     </Button>

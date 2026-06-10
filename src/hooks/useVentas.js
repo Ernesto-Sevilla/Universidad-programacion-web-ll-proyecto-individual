@@ -80,7 +80,7 @@ export const useVentas = () => {
         // 2. Mapear e insertar el nuevo estado del carrito de compras
         const detallesInsert = detalles.map(d => ({
           id_venta: ventaAEditar.id_venta,
-          producto_id: Number(d.producto_id),
+          id_producto: Number(d.id_producto),
           cantidad: Number(d.cantidad),
           precio_unitario: Number(d.precio),
           subtotal: Number(d.cantidad * d.precio)
@@ -111,7 +111,7 @@ export const useVentas = () => {
 
         const detallesInsert = detalles.map(d => ({
           id_venta: ventaData.id_venta,
-          producto_id: Number(d.producto_id),
+          id_producto: Number(d.id_producto),
           cantidad: Number(d.cantidad),
           precio_unitario: Number(d.precio),
           subtotal: Number(d.cantidad * d.precio)
@@ -144,7 +144,7 @@ export const useVentas = () => {
       const productosFresh = await ventaServicio.obtenerProductosParaVenta();
       
       for (const item of detalles) {
-        const prodBD = productosFresh.find(p => p.producto_id === Number(item.producto_id));
+        const prodBD = productosFresh.find(p => p.id_producto === Number(item.id_producto));
         if (!prodBD || Number(item.cantidad) > Number(prodBD.stock)) {
           setToast({ 
             mostrar: true, 
