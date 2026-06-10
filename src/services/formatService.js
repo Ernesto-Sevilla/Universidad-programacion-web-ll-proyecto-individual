@@ -29,7 +29,7 @@ Descripción: ${categoria.descripcion_categoria || 'Sin descripción'}`;
         const datosEsenciales = {
             id: categoria.id_categoria,
             nombre: categoria.nombre_categoria?.trim(),
-            descripcion: categoria.descripcion?.trim(),
+            descripcion: categoria.descripcion_categoria?.trim(),
         };
 
         // Retornamos en formato JSON para facilitar su posterior lectura e interpretación lógica

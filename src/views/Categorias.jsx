@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert, Modal } from "react-bootstrap";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -17,6 +17,7 @@ import TablaCategorias from "../components/categorias/TablaCategorias";
 import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
+import QRCodeAtom from "../components/atoms/QRCode.jsx";
 
 /**
  * Función pura auxiliar para renderizar y exportar la ficha en PDF de la entidad.
@@ -45,6 +46,10 @@ const generarPDFCategoria = (categoria) => {
 const Categorias = () => {
   // Estado local único para las alertas toast (requerido por el controlador)
   const [toast, setToast] = useState({ mostrar: false, message: "", tipo: "" });
+
+  const [mostrarModalQR, setMostrarModalQR] = useState(false);
+  const [categoriaQR, setCategoriaQR] = useState(null);
+
 
   // Desestructuración limpia de toda la lógica inyectada por el Custom Hook controlador
   const {
@@ -87,6 +92,15 @@ const Categorias = () => {
       textoEstructurado,
       `Categoría "${categoria.nombre_categoria}" copiada al portapapeles`
     );
+  };
+
+  /**
+   * Selecciona la entidad activa y despliega la UI modal.
+   * @param {Object} categoria - Objeto de la fila seleccionada.
+   */
+  const manejarAbrirModalQR = (categoria) => {
+    setCategoriaQR(categoria);
+    setMostrarModalQR(true);
   };
 
   // Hook personalizado e independiente para la gestión del portapapeles global
@@ -162,6 +176,22 @@ const Categorias = () => {
         categoria={categoriaAEliminar}
       />
 
+      <Modal show={mostrarModalQR} onHide={() => setMostrarModalQR(false)} centered size="sm">
+        <Modal.Header closeButton>
+          <Modal.Title className="fs-5">Código QR de Categoría</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center bg-light py-4">
+          {categoriaQR && (
+            <>
+              <h6 className="mb-3 text-secondary">{categoriaQR.nombre_categoria}</h6>
+              {/* Consumo del átomo puro pasándole la cadena JSON del servicio */}
+              <QRCodeAtom value={formatService.categoriaParaQR(categoriaQR)} size={180} />
+              <p className="text-muted small mt-3 mb-0">ID único: {categoriaQR.id_categoria}</p>
+            </>
+          )}
+        </Modal.Body>
+      </Modal>
+
       {/* Contenedor en caso de tabla vacía sin registros en base de datos */}
       {!cargando && categorias.length === 0 && (
         <Row className="text-center my-5">
@@ -208,6 +238,7 @@ const Categorias = () => {
                 abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFCategoria={generarPDFCategoria}
                 copiarCategoria={manejarCopiarCategoria}
+                abrirModalQR={manejarAbrirModalQR}
               />
             </Col>
           </Row>
