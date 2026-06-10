@@ -9,3 +9,4 @@ export * from './useEmpleados.js';
 export * from './useProductos.js';
 export * from './useCategorias.js';
 export * from './usePDFGenerator.js';
+export * from './useVentas.js';

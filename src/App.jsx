@@ -14,6 +14,7 @@ import Empleados from './views/Empleados.jsx';
 import Clientes from './views/Clientes.jsx';
 import Compras from './views/Compras.jsx';
 import Dashboard from './views/DashBoard.jsx';
+import Ventas from './views/ventas.jsx';
 
 import "./App.css";
 
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/clientes" element={<RutaProtegida><Clientes /></RutaProtegida>} />
           <Route path="/compras" element={<RutaProtegida><Compras /></RutaProtegida>} />
           <Route path="/dashboard" element={<RutaProtegida><Dashboard /></RutaProtegida>} />
+          <Route path="/ventas" element={<RutaProtegida><Ventas /></RutaProtegida>} />
 
           <Route path="*" element={<Pagina404 />} />
 

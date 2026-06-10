@@ -10,3 +10,4 @@ export * from './productoServicio.js';
 export * from './geminiService.js';
 export * from './compraServicio.js';
 export * from './formatService.js';
+export * from './ventaServicio.js'
