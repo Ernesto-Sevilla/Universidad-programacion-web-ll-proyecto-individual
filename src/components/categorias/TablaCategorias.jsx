@@ -8,6 +8,7 @@ const TablaCategorias = ({
   abrirModalEliminacion,
   generarPDFCategoria,
   copiarCategoria,
+  abrirModalQR,
 }) => {
 
   return (
@@ -63,6 +64,15 @@ const TablaCategorias = ({
                   title="Copiar al portapapeles"
                 >
                   <i className="bi bi-clipboard"></i>
+                </Button>
+                <Button
+                  variant="outline-dark"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => abrirModalQR(categoria)}
+                  title="Ver Código QR"
+                >
+                  <i className="bi bi-qr-code"></i>
                 </Button>
 
               </td>
