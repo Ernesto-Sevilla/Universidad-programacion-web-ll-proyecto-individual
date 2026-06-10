@@ -17,7 +17,7 @@ export const useVentas = () => {
   const cargarDatosAuxiliares = async () => {
     try {
       const [c, e] = await Promise.all([
-        supabase.from("clientes").select("*").order("nombre1", { ascending: true }),
+        supabase.from("clientes").select("*").order("nombre", { ascending: true }),
         supabase.from("empleados").select("*").order("nombre_empleado", { ascending: true })
       ]);
 
