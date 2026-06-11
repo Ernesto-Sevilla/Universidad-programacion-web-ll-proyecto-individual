@@ -143,7 +143,7 @@ export const FormularioVenta = ({
                                             <option value="">-- Seleccionar Cliente --</option>
                                             {clientes.map((c) => (
                                                 <option key={c.id_cliente} value={c.id_cliente}>
-                                                    {c.nombre_cliente ? `${c.nombre_cliente} ${c.apellido_cliente || ""}` : `${c.nombre1} ${c.apellido1}`} ({c.cedula || 'S/C'})
+                                                    {c.nombre ? `${c.nombre} ${c.apellido || ""}` : `${c.nombre} ${c.apellido}`} ({c.celular || 'S/C'})
                                                 </option>
                                             ))}
                                         </Form.Select>
