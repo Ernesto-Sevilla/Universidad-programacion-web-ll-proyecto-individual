@@ -135,7 +135,7 @@ const Encabezado = () => {
               onClick={() => manejarNavegacion("/compras")}
               className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >
-              {mostrarMenu ? <i className="bi-cart-check-fill me-2"></i> : null}
+              {mostrarMenu ? <i className="bi bi-bag me-2"></i> : null}
               <strong>Compras</strong>
             </Nav.Link>
 
@@ -143,7 +143,7 @@ const Encabezado = () => {
               onClick={() => manejarNavegacion("/dashboard")}
               className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >
-              {mostrarMenu ? <i className="bi-cart-check-fill me-2"></i> : null}
+              {mostrarMenu ? <i className="bi bi-speedometer me-2"></i> : null}
               <strong>DashBoard</strong>
             </Nav.Link>            
 
