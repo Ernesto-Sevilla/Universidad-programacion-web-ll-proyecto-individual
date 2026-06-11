@@ -6,7 +6,7 @@ const Paginacion = ({
   registrosPorPagina,
   totalRegistros,
   paginaActual,
-  establcerPaginaActual,
+  establecerPaginaActual,
   establecerRegistrosPorPagina,
 }) => {
   //Calcular el total de páginas
@@ -15,14 +15,14 @@ const Paginacion = ({
   //Cambiar de página
   const cambiarPagina = (numeroPagina) => {
     if (numeroPagina >= 1 && numeroPagina <= totalPaginas) {
-      establcerPaginaActual(numeroPagina);
+      establecerPaginaActual(numeroPagina);
     }
   };
 
   //Cambiar la cantidad de registros por página
   const cambiarCantidadRegistros = (evento) => {
     establecerRegistrosPorPagina(Number(evento.target.value));
-    establcerPaginaActual(1);
+    establecerPaginaActual(1);
   }
 
   // Generar la botones de páginación
