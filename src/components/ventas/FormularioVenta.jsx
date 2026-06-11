@@ -132,9 +132,9 @@ export const FormularioVenta = ({
                                     <Form.Group className="mb-3">
                                         <Form.Label>Cliente <span className="text-danger">*</span></Form.Label>
                                         <Form.Select
-                                            value={clienteSeleccionado?.cliente_id || ""}
+                                            value={clienteSeleccionado?.id_cliente || ""}
                                             onChange={(e) => {
-                                                const cl = clientes.find((c) => c.cliente_id === Number(e.target.value));
+                                                const cl = clientes.find((c) => c.id_cliente === Number(e.target.value));
                                                 setClienteSeleccionado(cl || null);
                                             }}
                                             required
@@ -142,7 +142,7 @@ export const FormularioVenta = ({
                                         >
                                             <option value="">-- Seleccionar Cliente --</option>
                                             {clientes.map((c) => (
-                                                <option key={c.cliente_id} value={c.cliente_id}>
+                                                <option key={c.id_cliente} value={c.id_cliente}>
                                                     {c.nombre_cliente ? `${c.nombre_cliente} ${c.apellido_cliente || ""}` : `${c.nombre1} ${c.apellido1}`} ({c.cedula || 'S/C'})
                                                 </option>
                                             ))}
