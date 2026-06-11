@@ -175,7 +175,7 @@ export const ventaServicio = {
     try {
       const promesas = detalles.map(d =>
         supabase.rpc('procesar_descuento_stock', {
-          id_producto: d.id_producto,
+          p_id_producto: d.id_producto,
           p_cantidad: d.cantidad
         })
       );
