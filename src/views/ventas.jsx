@@ -155,7 +155,7 @@ const Ventas = () => {
     <Container fluid className="py-4">
       <NotificacionOperacion
         mostrar={toast.mostrar}
-        mensaje={toast.mensaje}
+        message={toast.message}
         tipo={toast.tipo}
         onCerrar={() => setToast({ ...toast, mostrar: false })}
       />

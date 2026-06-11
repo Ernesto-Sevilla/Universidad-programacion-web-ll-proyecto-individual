@@ -4,7 +4,7 @@ import { supabase } from "../database/supabaseconfig";
 import { ventaServicio } from "@/services";
 
 export const useVentas = () => {
-  const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
+  const [toast, setToast] = useState({ mostrar: false, message: "", tipo: "" });
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -40,7 +40,7 @@ export const useVentas = () => {
       setVentas(data);
     } catch (err) {
       console.error("❌ Error al cargar ventas desde el Hook:", err);
-      setToast({ mostrar: true, mensaje: "Error al cargar las ventas de la base de datos", tipo: "error" });
+      setToast({ mostrar: true, message: "Error al cargar las ventas de la base de datos", tipo: "error" });
     } finally {
       setCargando(false);
     }
@@ -51,7 +51,7 @@ export const useVentas = () => {
     try {
       // Bloqueo de seguridad: Si intentan editar una venta que ya está Cerrada en base de datos
       if (ventaAEditar?.estado === "Cerrada") {
-        setToast({ mostrar: true, mensaje: "No se puede modificar una venta Cerrada", tipo: "error" });
+        setToast({ mostrar: true, message: "No se puede modificar una venta Cerrada", tipo: "error" });
         return false;
       }
 
@@ -89,7 +89,7 @@ export const useVentas = () => {
         const { error: errorDetalles } = await supabase.from("detalles_ventas").insert(detallesInsert);
         if (errorDetalles) throw errorDetalles;
 
-        setToast({ mostrar: true, mensaje: "Venta modificada exitosamente", tipo: "exito" });
+        setToast({ mostrar: true, message: "Venta modificada exitosamente", tipo: "exito" });
       } else {
         // === MODO: REGISTRAR NUEVA VENTA ===
         const nicaNow = () => new Date().toLocaleString("sv", { timeZone: "America/Managua" }).replace(" ", "T");
@@ -120,14 +120,14 @@ export const useVentas = () => {
         const { error: errorNuevosDetalles } = await supabase.from("detalles_ventas").insert(detallesInsert);
         if (errorNuevosDetalles) throw errorNuevosDetalles;
 
-        setToast({ mostrar: true, mensaje: "Factura procesada con éxito", tipo: "exito" });
+        setToast({ mostrar: true, message: "Factura procesada con éxito", tipo: "exito" });
       }
 
       await cargarVentas(); // Recarga reactiva de la grilla principal
       return true;
     } catch (err) {
       console.error("❌ Falló la operación en Supabase:", err);
-      setToast({ mostrar: true, mensaje: "Error crítico al guardar la operación", tipo: "error" });
+      setToast({ mostrar: true, message: "Error crítico al guardar la operación", tipo: "error" });
       return false;
     }
   };
@@ -148,7 +148,7 @@ export const useVentas = () => {
         if (!prodBD || Number(item.cantidad) > Number(prodBD.stock)) {
           setToast({ 
             mostrar: true, 
-            mensaje: `No se puede cerrar la venta. El artículo "${item.nombre}" se quedó sin stock suficiente en bodega.`, 
+            message: `No se puede cerrar la venta. El artículo "${item.nombre}" se quedó sin stock suficiente en bodega.`, 
             tipo: "error" 
           });
           return false;
@@ -163,14 +163,14 @@ export const useVentas = () => {
         await ventaServicio.descontarInventario(detalles);
       }
 
-      setToast({ mostrar: true, mensaje: "Venta cerrada definitivamente e inventario actualizado", tipo: "exito" });
+      setToast({ mostrar: true, message: "Venta cerrada definitivamente e inventario actualizado", tipo: "exito" });
       
       // Sincronizar grilla e inventarios auxiliares
       await Promise.all([cargarVentas(), cargarDatosAuxiliares()]);
       return true;
     } catch (err) {
       console.error("❌ Error al cerrar la factura:", err);
-      setToast({ mostrar: true, mensaje: "Error al consolidar el cierre en el inventario", tipo: "error" });
+      setToast({ mostrar: true, message: "Error al consolidar el cierre en el inventario", tipo: "error" });
       return false;
     }
   };
