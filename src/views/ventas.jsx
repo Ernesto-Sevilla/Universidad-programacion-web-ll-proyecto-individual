@@ -173,8 +173,10 @@ const Ventas = () => {
         </Col>
       </Row>
 
-      <CuadroBusquedas textoBusqueda={textoBusqueda}
-        manejarCambioBusqueda={setTextoBusqueda} />
+      <CuadroBusquedas 
+        textoBusqueda={textoBusqueda}
+        manejarCambioBusqueda={(e) => setTextoBusqueda(e.target.value)} 
+      />
 
       {cargando ? (
         <div className="text-center my-5">
