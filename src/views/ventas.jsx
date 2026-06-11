@@ -206,6 +206,7 @@ const Ventas = () => {
             registrosPorPagina={registrosPorPagina}
             paginaActual={paginaActual}
             establecerPaginaActual={establecerPaginaActual}
+            establecerRegistrosPorPagina={establecerRegistrosPorPagina}
           />
         </>
       )}
