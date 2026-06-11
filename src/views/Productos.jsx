@@ -56,9 +56,10 @@ const generarPDFProducto = async (producto) => {
     head: [["Campo", "Información"]],
     body: [
       ["ID del Sistema", producto.id_producto],
-      ["Nombre Comercial", producto.nombre_producto],
+      ["Nombre Comercial", producto.nombre],
       ["Categoría", producto.categorias?.nombre_categoria || "Sin categoría"],
       ["Precio de Venta", `$${parseFloat(producto.precio_venta).toFixed(2)}`],
+      ["Stock", producto.stock || "Sin stock"],
       ["Descripción", producto.descripcion_producto || "Sin descripción"],
     ],
     headStyles: { fillColor: [41, 128, 185] },
@@ -72,7 +73,7 @@ const generarPDFProducto = async (producto) => {
 
   doc.setFontSize(10);
   doc.text(`Reporte generado el: ${new Date().toLocaleDateString()}`, 14, 285);
-  doc.save(`Ficha_${producto.nombre_producto.replace(/\s+/g, '_')}.pdf`);
+  doc.save(`Ficha_${producto.nombre.replace(/\s+/g, '_')}.pdf`);
 };
 
 // ==========================================================================
@@ -133,6 +134,7 @@ const Producto = () => {
 
   // Manejadores de Modales
   const abrirModalEdicion = (producto) => {
+    console.log("📦 OBJETO RECIBIDO DE LA TABLA:", producto);
     setProductoEditar(producto);
     setMostrarModalEdicion(true);
   };

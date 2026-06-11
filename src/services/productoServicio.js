@@ -76,10 +76,11 @@ export const productoServicio = {
    * Crea un nuevo registro de producto en la base de datos.
    * @async
    * @param {Object} producto - Objeto con los datos del formulario de registro.
-   * @param {string} producto.nombre_producto - Nombre comercial del producto.
+   * @param {string} producto.nombre - Nombre comercial del producto.
    * @param {string} [producto.descripcion_producto] - Descripción opcional.
    * @param {number|string} producto.categoria_producto - ID de la categoría asociada.
    * @param {number|string} producto.precio_venta - Precio en formato numérico o string.
+   * @param {number|string} producto.stock - Almacenamiento disponible
    * @param {string} urlImagen - La URL pública de la imagen previamente subida al Storage.
    * @throws {Error} Si la inserción en la tabla "productos" falla.
    * @returns {Promise<void>} No retorna datos.
@@ -87,10 +88,11 @@ export const productoServicio = {
   async crear(producto, urlImagen) {
     const { error } = await supabase.from("productos").insert([
       {
-        nombre_producto: producto.nombre_producto,
+        nombre: producto.nombre,
         descripcion_producto: producto.descripcion_producto || null,
         categoria_producto: producto.categoria_producto,
         precio_venta: parseFloat(producto.precio_venta),
+        stock: producto.stock,
         imagen_url: urlImagen,
       },
     ]);

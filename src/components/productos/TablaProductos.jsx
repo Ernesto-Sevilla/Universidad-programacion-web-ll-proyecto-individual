@@ -14,6 +14,7 @@ const TablaProductos = ({
           <th>Producto</th>
           <th>Categoría</th>
           <th>Precio</th>
+          <th>Stock</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -25,18 +26,20 @@ const TablaProductos = ({
               {/*VISUALIZACIÓN DE LA IMAGEN */}
               <Image
                 src={prod.imagen_url}
-                alt={prod.nombre_producto}
+                alt={prod.nombre}
                 rounded
                 style={{ width: "50px", height: "50px", objectFit: "cover" }}
                 onError={(e) => { e.target.src = "https://via.placeholder.com/50"; }}
               />
             </td>
             <td>
-              <div className="fw-bold">{prod.nombre_producto}</div>
+              <div className="fw-bold">{prod.nombre}</div>
               <small className="text-muted">{prod.descripcion_producto}</small>
             </td>
             <td>{prod.categorias?.nombre_categoria}</td>
             <td>${parseFloat(prod.precio_venta).toFixed(2)}</td>
+            <td>{prod.stock}</td>
+
             <td className="text-end">
 
               <Button

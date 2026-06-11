@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col, InputGroup } from "react-bootstrap";
 
-const ModalRegistroProducto = ({ 
-  mostrarModal, 
-  setMostrarModal, 
+const ModalRegistroProducto = ({
+  mostrarModal,
+  setMostrarModal,
   nuevoProducto,
   manejoCambioinput,
   manejoCambioArcvhivo,
   agregarProducto,
-  categorias, 
+  categorias,
   setMostrarModalCategoria
 }) => {
 
-  const [ deshabilitado, setDeshabilitado ] = useState(false);
+  const [deshabilitado, setDeshabilitado] = useState(false);
 
   const handleAgregar = async () => {
     if (deshabilitado) return; // Evitar múltiples clics
@@ -48,14 +48,14 @@ const ModalRegistroProducto = ({
                     onChange={manejoCambioinput}
                     required
                   >
-                    
-                  <option value="">Seleccione...</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.id_categoria} value={cat.id_categoria}>
-                      {cat.nombre_categoria}
-                    </option>
-                  ))}
-                </Form.Select>
+
+                    <option value="">Seleccione...</option>
+                    {categorias.map((cat) => (
+                      <option key={cat.id_categoria} value={cat.id_categoria}>
+                        {cat.nombre_categoria}
+                      </option>
+                    ))}
+                  </Form.Select>
 
                   <Button
                     variant="outline-primary"
@@ -72,8 +72,8 @@ const ModalRegistroProducto = ({
                 <Form.Label>Nombre *</Form.Label>
                 <Form.Control
                   type="text"
-                  name="nombre_producto"
-                  value={nuevoProducto.nombre_producto || ""}
+                  name="nombre"
+                  value={nuevoProducto.nombre || ""}
                   onChange={manejoCambioinput}
                   placeholder="Nombre del producto"
                   required
@@ -92,6 +92,20 @@ const ModalRegistroProducto = ({
                   value={nuevoProducto.precio_venta || ""}
                   onChange={manejoCambioinput}
                   placeholder="Precio de venta"
+                  required
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Stock</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  name="stock"
+                  value={nuevoProducto.stock || ""}
+                  onChange={manejoCambioinput}
                   required
                 />
               </Form.Group>
@@ -122,7 +136,7 @@ const ModalRegistroProducto = ({
                 />
               </Form.Group>
             </Col>
-            
+
           </Row>
         </Form>
       </Modal.Body>

@@ -16,19 +16,21 @@ export const useProductos = (notificar) => {
 
 
   const [nuevoProducto, setNuevoProducto] = useState({
-    nombre_producto: "",
+    nombre: "",
     descripcion_producto: "",
     categoria_producto: "",
     precio_venta: "",
+    stock: "",
     archivo: null,
   });
 
   const [productoEditar, setProductoEditar] = useState({
     id_producto: "",
-    nombre_producto: "",
+    nombre: "",
     descripcion_producto: "",
     categoria_producto: "",
     precio_venta: "",
+    stock: "",
     imagen_url: "",
     archivo: null,
   });
@@ -52,7 +54,7 @@ export const useProductos = (notificar) => {
 
   const agregarProducto = async (onSuccess) => {
     // Validación rápida de campos obligatorios
-    if (!nuevoProducto.nombre_producto.trim() || !nuevoProducto.precio_venta || !nuevoProducto.categoria_producto || !nuevoProducto.archivo) {
+    if (!nuevoProducto.nombre || !nuevoProducto.precio_venta || !nuevoProducto.categoria_producto || !nuevoProducto.archivo) {
       if (notificar) notificar("Por favor completa todos los campos obligatorios.", "advertencia");
       return;
     }
@@ -64,7 +66,7 @@ export const useProductos = (notificar) => {
 
       // 3. Sincronizar UI y limpiar
       await cargarProductos();
-      setNuevoProducto({ nombre_producto: "", descripcion_producto: "", categoria_producto: "", precio_venta: "", archivo: null });
+      setNuevoProducto({ nombre: "", descripcion_producto: "", categoria_producto: "", precio_venta: "", stock: "", archivo: null });
 
       if (onSuccess) onSuccess(); // Cierra el modal en la UI
       if (notificar) notificar("Producto agregado exitosamente.", "exito");
@@ -76,17 +78,18 @@ export const useProductos = (notificar) => {
 
 
   const actualizarProducto = async (onSuccess) => {
-    if (!productoEditar.nombre_producto.trim() || !productoEditar.categoria_producto || !productoEditar.precio_venta) {
+    if (!productoEditar.nombre || !productoEditar.categoria_producto || !productoEditar.precio_venta) {
       if (notificar) notificar("Completa los campos obligatorios.", "advertencia");
       return;
     }
 
     try {
       let datosActualizados = {
-        nombre_producto: productoEditar.nombre_producto,
+        nombre: productoEditar.nombre,
         descripcion_producto: productoEditar.descripcion_producto || null,
         categoria_producto: productoEditar.categoria_producto,
         precio_venta: parseFloat(productoEditar.precio_venta),
+        stock: productoEditar.stock,
         imagen_url: productoEditar.imagen_url,
       };
 
@@ -143,7 +146,7 @@ export const useProductos = (notificar) => {
 
       await cargarProductos();
       if (onSuccess) onSuccess();
-      if (notificar) notificar(`Producto "${productoAEliminar.nombre_producto}" eliminado.`, "exito");
+      if (notificar) notificar(`Producto "${productoAEliminar.nombre}" eliminado.`, "exito");
     } catch (err) {
       console.error(err);
       if (notificar) notificar("Error al eliminar el producto.", "error");
@@ -197,7 +200,7 @@ export const useProductos = (notificar) => {
 
     setProductosFiltrados(
       productos.filter((prod) => {
-        const nombre = prod.nombre_producto?.toLowerCase() || "";
+        const nombre = prod.nombre?.toLowerCase() || "";
         const descripcion = prod.descripcion_producto?.toLowerCase() || "";
         const precio = prod.precio_venta?.toString() || "";
         return nombre.includes(termino) || descripcion.includes(termino) || precio.includes(termino);

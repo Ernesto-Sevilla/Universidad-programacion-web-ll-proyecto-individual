@@ -20,6 +20,8 @@ const ModalEdicionProducto = ({
     setDeshabilitado(false);
   }
 
+  
+
   return (
 
     <Modal
@@ -62,8 +64,8 @@ const ModalEdicionProducto = ({
                 <Form.Label>Nombre *</Form.Label>
                 <Form.Control
                   type="text"
-                  name="nombre_producto"
-                  value={productoEditar.nombre_producto || ""}
+                  name="nombre"
+                  value={productoEditar.nombre || ""}
                   onChange={manejoCambioInputEdicion}
                   required
                   /> 
@@ -79,6 +81,20 @@ const ModalEdicionProducto = ({
                   min="0"
                   name="precio_venta"
                   value={productoEditar.precio_venta || ""}
+                  onChange={manejoCambioInputEdicion}
+                  required
+                  /> 
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Stock</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  name="stock"
+                  value={productoEditar.stock || ""}
                   onChange={manejoCambioInputEdicion}
                   required
                   /> 
