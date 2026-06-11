@@ -171,24 +171,55 @@ export const ventaServicio = {
       throw dbError;
     }
   },
-  async descontarInventario(detalles) {
+async descontarInventario(detalles) {
     try {
-      const promesas = detalles.map(d =>
-        supabase.rpc('procesar_descuento_stock', {
-          p_id_producto: d.id_producto,
-          p_cantidad: d.cantidad
-        })
-      );
+      // 1. Sanitizar y extraer los identificadores de los productos a procesar
+      const operaciones = detalles.map(d => {
+        const id = Number(d.id_producto || d.producto_id);
+        const cant = Number(d.cantidad);
+        
+        if (isNaN(id) || isNaN(cant)) {
+          throw new Error(`Datos inválidos para operación de inventario. ID: ${id}, Cantidad: ${cant}`);
+        }
+        return { id, cant };
+      });
 
-      const resultados = await Promise.all(promesas);
+      // 2. Procesar de forma secuencial o paralela la actualización directa en la tabla 'productos'
+      // Nota: Usamos una consulta directa de actualización relativa basada en el stock actual
+      const promesas = operaciones.map(async (op) => {
+        
+        // Primero obtenemos el stock actual del producto en la base de datos
+        const { data: producto, error: errorLectura } = await supabase
+          .from("productos")
+          .select("stock")
+          // Cambiar a "producto_id" si tu columna llave usa ese nombre exacto en Postgres
+          .eq("id_producto", op.id) 
+          .single();
 
-      // Verificar si alguna petición falló
-      for (const res of resultados) {
-        if (res.error) throw res.error;
-      }
+        if (errorLectura) throw errorLectura;
+        if (!producto) throw new Error(`El producto con ID ${op.id} no fue encontrado en la tabla productos.`);
+
+        const nuevoStock = Number(producto.stock) - op.cant;
+
+        if (nuevoStock < 0) {
+          throw new Error(`Operación rechazada: Stock insuficiente para el ID ${op.id}. Stock actual: ${producto.stock}, Solicitado: ${op.cant}`);
+        }
+
+        // Ejecutamos la persistencia del nuevo stock de forma directa
+        const { error: errorUpdate } = await supabase
+          .from("productos")
+          .update({ stock: nuevoStock })
+          .eq("id_producto", op.id); // Ajustar el nombre de la columna llave aquí también si es necesario
+
+        if (errorUpdate) throw errorUpdate;
+      });
+
+      // Ejecutar todas las actualizaciones en paralelo
+      await Promise.all(promesas);
+
     } catch (error) {
       const dbError = handleSupabaseError(error);
-      console.error(`[ventaServicio][descontarInventario] ❌:`, dbError.devMessage);
+      console.error(`[ventaServicio][descontarInventario] ❌ Falló la actualización directa:`, dbError.devMessage);
       throw dbError;
     }
   }
