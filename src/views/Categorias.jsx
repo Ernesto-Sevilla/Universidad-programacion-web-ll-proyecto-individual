@@ -228,6 +228,7 @@ const Categorias = () => {
                 abrirModalEliminacion={abrirModalEliminacion}
                 generarPDFCategoria={generarPDFCategoria}
                 copiarCategoria={manejarCopiarCategoria}
+                abrirModalQR={manejarAbrirModalQR}
               />
             </Col>
             {/* Responsivo: Tabla estructurada para pantallas grandes */}

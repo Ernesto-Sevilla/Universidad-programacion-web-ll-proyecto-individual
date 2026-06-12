@@ -8,7 +8,8 @@ const TarjetaCategoria = ({
   abrirModalEdicion,
   abrirModalEliminacion,
   generarPDFCategoria,
-  copiarCategoria
+  copiarCategoria,
+  abrirModalQR
 }) => {
   const { idActivo, alternarActivo, cerrar } = useSeleccionTarjeta();
 
@@ -51,6 +52,16 @@ const TarjetaCategoria = ({
                 title="Copiar al portapapeles"
               >
                 <i className="bi bi-clipboard"></i>
+              </Button>
+
+              <Button
+                variant="outline-dark"
+                size="sm"
+                className="me-2"
+                onClick={() => abrirModalQR(cat)}
+                title="Ver Código QR"
+              >
+                <i className="bi bi-qr-code"></i>
               </Button>
             </>
           }
