@@ -36,7 +36,7 @@ export const fetchDetallesDeVentas = async (idsVentas) => {
       cantidad, 
       subtotal,
       productos (
-        nombre_producto,
+        nombre,
         categorias (nombre_categoria)
       )
     `)
@@ -157,7 +157,7 @@ export const generarReporteExcel = async (fechaDesde, fechaHasta) => {
         subtotal,
         id_producto,
         productos (
-          nombre_producto,
+          nombre,
           categorias (nombre_categoria)
         )
       `)
