@@ -125,7 +125,7 @@ const Producto = () => {
 
   // Paginación local de productos
   const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
-  const [paginaActual, establcerPaginaActual] = useState(1);
+  const [paginaActual, establecerPaginaActual] = useState(1);
 
   const productosPaginadas = productosFiltrados.slice(
     (paginaActual - 1) * registrosPorPagina,
@@ -287,7 +287,7 @@ const Producto = () => {
             registrosPorPagina={registrosPorPagina}
             totalRegistros={productosFiltrados.length}
             paginaActual={paginaActual}
-            establcerPaginaActual={establcerPaginaActual}
+            establecerPaginaActual={establecerPaginaActual}
             establecerRegistrosPorPagina={establecerRegistrosPorPagina}
           />
         </>

@@ -193,7 +193,7 @@ const Clientes = () => {
             registrosPorPagina={registrosPorPagina}
             totalRegistros={clientesFiltrados.length}
             paginaActual={paginaActual}
-            establcerPaginaActual={setPaginaActual}
+            establecerPaginaActual={setPaginaActual}
             establecerRegistrosPorPagina={setRegistrosPorPagina}
           />
         </>
