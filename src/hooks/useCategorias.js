@@ -34,7 +34,7 @@ export const useCategorias = (notificar) => {
 
   // Paginación
   const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
-  const [paginaActual, establcerPaginaActual] = useState(1);
+  const [paginaActual, establecerPaginaActual] = useState(1);
 
   // Carga inicial de datos
   const cargarCategorias = async () => {
@@ -67,7 +67,7 @@ export const useCategorias = (notificar) => {
       );
       setCategoriasFiltradas(filtradas);
     }
-    establcerPaginaActual(1); // Reiniciar a la primera página ante una nueva búsqueda
+    establecerPaginaActual(1); // Reiniciar a la primera página ante una nueva búsqueda
   }, [textoBusqueda, categorias]);
 
   // Manejadores de entrada en formularios
@@ -201,6 +201,6 @@ export const useCategorias = (notificar) => {
     registrosPorPagina,
     establecerRegistrosPorPagina,
     paginaActual,
-    establcerPaginaActual,
+    establecerPaginaActual,
   };
 };

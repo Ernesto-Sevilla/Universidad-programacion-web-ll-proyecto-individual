@@ -78,7 +78,7 @@ const Categorias = () => {
     registrosPorPagina,
     establecerRegistrosPorPagina,
     paginaActual,
-    establcerPaginaActual,
+    establecerPaginaActual,
   } = useCategorias(setToast);
 
   /**
@@ -249,7 +249,7 @@ const Categorias = () => {
             registrosPorPagina={registrosPorPagina}
             totalRegistros={categoriasFiltradas.length}
             paginaActual={paginaActual}
-            establcerPaginaActual={establcerPaginaActual}
+            establecerPaginaActual={establecerPaginaActual}
             establecerRegistrosPorPagina={establecerRegistrosPorPagina}
           />
         </>
