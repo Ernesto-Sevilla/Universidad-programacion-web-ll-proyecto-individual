@@ -33,7 +33,7 @@ const Ventas = () => {
 
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [ventasFiltradas, setVentasFiltradas] = useState([]);
-  const [registrosPorPagina, establecerRegistrosPorPagina] = useState(8);
+  const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
   const [paginaActual, establecerPaginaActual] = useState(1);
 
   // Calcular total automáticamente cuando cambien los items agregados
