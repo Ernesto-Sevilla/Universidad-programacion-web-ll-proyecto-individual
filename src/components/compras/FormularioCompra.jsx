@@ -56,7 +56,16 @@ export const FormularioCompra = ({
     if (deshabilitado || esSoloLectura) return;
 
     setDeshabilitado(true);
-    const exito = await guardarCompra();
+
+    const datosCabecera = {
+      proveedor: proveedor,
+      id_empleado: empleadoSeleccionado?.id_empleado,
+      metodo_pago: metodoPago,
+      total: totalGeneral
+    };
+
+    const exito = await guardarCompra(compraAEditar, datosCabecera, detalles);
+
     setDeshabilitado(false);
 
     if (exito) setMostrar(false);
@@ -197,7 +206,7 @@ export const FormularioCompra = ({
                         <option value="">-- Seleccione un artículo --</option>
                         {productos.map((p) => (
                           <option key={p.id_producto} value={p.id_producto}>
-                            {p.nombre_producto} - Costo: {formatearMoneda(p.precio_compra)} (Stock actual: {p.stock})
+                            {p.nombre} - Costo: {formatearMoneda(p.precio_compra)} (Stock actual: {p.stock})
                           </option>
                         ))}
                       </Form.Select>
@@ -249,7 +258,7 @@ export const FormularioCompra = ({
               </thead>
               <tbody>
                 {detalles.length === 0 ? (
-                  <tr>
+                  <tr key="sin-articulos">
                     <td colSpan={esSoloLectura ? "5" : "6"} className="text-center py-4 text-muted italic">
                       <i className="bi bi-box me-2 fs-4 d-block mb-2"></i>
                       No se han listado artículos para este reabastecimiento.
@@ -259,9 +268,9 @@ export const FormularioCompra = ({
                   detalles.map((item) => (
                     <tr key={item.id_producto}>
                       <td>{item.id_producto}</td>
-                      <td className="fw-semibold text-dark">{item.nombre_producto}</td>
+                      <td className="fw-semibold text-dark">{item.nombre}</td>
                       {/* Renderizamos utilizando el precio de costo de compra asignado */}
-                      <td className="text-end">{formatearMoneda(item.precio)}</td>
+                      <td className="text-end">{formatearMoneda(item.precio_costo)}</td>
                       <td className="text-center">
                         <Form.Control
                           type="number"
@@ -275,7 +284,7 @@ export const FormularioCompra = ({
                         />
                       </td>
                       <td className="text-end fw-bold text-secondary">
-                        {formatearMoneda(item.cantidad * item.precio)}
+                        {formatearMoneda(item.cantidad * item.precio_costo)}
                       </td>
                       {!esSoloLectura && (
                         <td className="text-center">

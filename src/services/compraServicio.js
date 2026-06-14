@@ -8,7 +8,7 @@ import { handleSupabaseError } from "@/utils/errors";
  * @property {number} id_producto - ID del producto adquirido.
  * @property {number} cantidad - Cantidad comprada.
  * @property {number} precio_costo - Precio de costo unitario al momento de la compra.
- * @property {number} subtotal - Subtotal de la línea (cantidad * precio_costo).
+ * @property {number} subtotal - Subtotal de la línea (cantidad * precio_compra).
  */
 
 /**
@@ -47,7 +47,7 @@ export const compraServicio = {
           precio_costo,
           subtotal,
           productos (
-            nombre_producto,
+            nombre,
             precio_compra,
             stock
           )
@@ -133,17 +133,17 @@ export const compraServicio = {
   async obtenerProductosParaCompra() {
     const { data, error } = await supabase
       .from("productos")
-      .select("id_producto, nombre_producto, precio_compra, stock")
-      .order("nombre_producto", { ascending: true });
+      .select("id_producto, nombre, precio_compra, stock")
+      .order("nombre", { ascending: true });
 
     if (error) {
       const dbError = handleSupabaseError(error);
       console.warn(`⚠️ [compraServicio][obtenerProductosParaCompra]: ${dbError.devMessage}. Usando fallback local.`);
 
       return [
-        { id_producto: 1, nombre_producto: "Producto Demo A (Abastecimiento)", precio_compra: 15.50, stock: 100 },
-        { id_producto: 2, nombre_producto: "Producto Demo B (Abastecimiento)", precio_compra: 45.00, stock: 50 },
-        { id_producto: 3, nombre_producto: "Producto Demo C (Abastecimiento)", precio_compra: 120.00, stock: 25 }
+        { id_producto: 1, nombre: "Producto Demo A (Abastecimiento)", precio_compra: 15.50, stock: 100 },
+        { id_producto: 2, nombre: "Producto Demo B (Abastecimiento)", precio_compra: 45.00, stock: 50 },
+        { id_producto: 3, nombre: "Producto Demo C (Abastecimiento)", precio_compra: 120.00, stock: 25 }
       ];
     }
 

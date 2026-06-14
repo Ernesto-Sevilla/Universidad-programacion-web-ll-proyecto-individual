@@ -37,7 +37,7 @@ const Compras = () => {
 
   // Calcular costo total automáticamente cuando cambien los items del detalle
   useEffect(() => {
-    const total = detalles.reduce((sum, det) => sum + det.cantidad * det.precio, 0);
+    const total = detalles.reduce((sum, det) => sum + det.cantidad * det.precio_compra, 0);
     setTotalGeneral(total);
   }, [detalles]);
 
@@ -81,9 +81,9 @@ const Compras = () => {
     // Sincronización del desglose inyectado por la relación maestro-detalle
     if (compra.detalles_compras && compra.detalles_compras.length > 0) {
       setDetalles(compra.detalles_compras.map(d => ({
-        producto_id: d.producto_id,
+        id_producto: d.id_producto,
         nombre: d.productos?.nombre || "Producto", // Resuelve JOIN relacional
-        precio: Number(d.precio_costo),
+        precio_costo: Number(d.precio_compra),
         cantidad: Number(d.cantidad)
       })));
     } else {
@@ -104,29 +104,29 @@ const Compras = () => {
   const agregarDetalle = (producto, cantidad) => {
     if (!producto || !cantidad) return;
     setDetalles(prev => {
-      const existe = prev.find(d => d.producto_id === producto.producto_id);
+      const existe = prev.find(d => d.id_producto === producto.id_producto);
       if (existe) {
         return prev.map(d =>
-          d.producto_id === producto.producto_id ? { ...d, cantidad: d.cantidad + cantidad } : d
+          d.id_producto === producto.id_producto ? { ...d, cantidad: d.cantidad + cantidad } : d
         );
       }
       return [...prev, {
-        producto_id: producto.producto_id,
+        id_producto: producto.id_producto,
         nombre: producto.nombre,
-        precio: producto.precio_compra, // Captura el costo real de adquisición
+        precio_costo: producto.precio_compra, // Captura el costo real de adquisición
         cantidad: cantidad
       }];
     });
   };
 
   const eliminarDetalle = (idProducto) => {
-    setDetalles(prev => prev.filter(d => d.producto_id !== idProducto));
+    setDetalles(prev => prev.filter(d => d.id_producto !== idProducto));
   };
 
   const actualizarCantidad = (idProducto, nuevaCantidad) => {
     if (nuevaCantidad < 1) return;
     setDetalles(prev => prev.map(d => 
-      d.producto_id === idProducto ? { ...d, cantidad: nuevaCantidad } : d
+      d.id_producto === idProducto ? { ...d, cantidad: nuevaCantidad } : d
     ));
   };
 
