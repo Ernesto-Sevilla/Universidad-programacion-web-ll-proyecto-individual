@@ -37,20 +37,31 @@ export const FormularioCompra = ({
         setEmpleadoSeleccionado(emp || null);
       }
 
-      if (setDetalles) {
-        setDetalles(compraSeleccionada.detalles_compras || []);
+      if (setDetalles && productos) {
+        const detallesConNombre = (compraSeleccionada.detalles_compras || []).map((detalle) => {
+
+          const productoEncontrado = productos.find(
+            (p) => p.id_producto === detalle.id_producto
+          );
+
+          return {
+            ...detalle,
+            nombre: detalle.productos?.nombre || productoEncontrado?.nombre || "Producto no identificado"
+          };
+        });
+
+        setDetalles(detallesConNombre);
       }
     }
-
     else {
       if (setProveedor) setProveedor("");
       if (setMetodoPago) setMetodoPago("efectivo");
       if (setEmpleadoSeleccionado) setEmpleadoSeleccionado(null);
       if (setDetalles) setDetalles([]);
     }
-  }, [compraSeleccionada, empleados, setProveedor, setMetodoPago, setEmpleadoSeleccionado, setDetalles]);
+  }, [compraSeleccionada, empleados, productos, setProveedor, setMetodoPago, setEmpleadoSeleccionado, setDetalles]);
 
-  // Formateador de moneda regional (Córdobas - NIO)
+// Formateador de moneda regional (Córdobas - NIO)
   const formatearMoneda = (monto) => {
     return new Intl.NumberFormat("es-NI", {
       style: "currency",
