@@ -32,7 +32,7 @@ const Compras = () => {
 
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [comprasFiltradas, setComprasFiltradas] = useState([]);
-  const [registrosPorPagina, establecerRegistrosPorPagina] = useState(8);
+  const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
   const [paginaActual, establecerPaginaActual] = useState(1);
 
   // Calcular costo total automáticamente cuando cambien los items del detalle
@@ -202,6 +202,7 @@ const Compras = () => {
             registrosPorPagina={registrosPorPagina} 
             paginaActual={paginaActual} 
             establecerPaginaActual={establecerPaginaActual} 
+            establecerRegistrosPorPagina={establecerRegistrosPorPagina}
           />
         </>
       )}
