@@ -1,7 +1,7 @@
 // src/views/Ventas.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
-import { useVentas } from "@/hooks";
+import { useVentas, usePDFGenerator } from "@/hooks";
 
 import NotificacionOperacion from "../components/NotificationOperation.jsx";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas.jsx";
@@ -35,6 +35,9 @@ const Ventas = () => {
   const [ventasFiltradas, setVentasFiltradas] = useState([]);
   const [registrosPorPagina, establecerRegistrosPorPagina] = useState(5);
   const [paginaActual, establecerPaginaActual] = useState(1);
+
+  // Importamos el generador de PDF
+  const { generateReceiptPDF, isGenerating } = usePDFGenerator();
 
   // Calcular total automáticamente cuando cambien los items agregados
   useEffect(() => {
@@ -151,6 +154,10 @@ const Ventas = () => {
     }
   };
 
+  const handleDescargarRecibo = (venta) => {
+    generateReceiptPDF(venta, `recibo_venta_#${venta.id_venta}.pdf`);
+  };
+
   return (
     <Container fluid className="py-4">
       <NotificacionOperacion
@@ -190,7 +197,7 @@ const Ventas = () => {
             <TablaVentas
               ventas={ventasPaginadas}
               abrirModalEdicion={abrirEdicion}
-              generarPDFVenta={() => { }}
+              generarPDFVenta={handleDescargarRecibo}
             />
           </div>
 
