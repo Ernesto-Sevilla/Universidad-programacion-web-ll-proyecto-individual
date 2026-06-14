@@ -37,7 +37,7 @@ const Compras = () => {
 
   // Calcular costo total automáticamente cuando cambien los items del detalle
   useEffect(() => {
-    const total = detalles.reduce((sum, det) => sum + det.cantidad * det.precio_compra, 0);
+    const total = detalles.reduce((sum, det) => sum + det.cantidad * det.precio_costo, 0);
     setTotalGeneral(total);
   }, [detalles]);
 
