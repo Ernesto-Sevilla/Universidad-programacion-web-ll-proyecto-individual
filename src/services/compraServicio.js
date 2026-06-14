@@ -159,7 +159,7 @@ export const compraServicio = {
       // Mapeamos los detalles para disparar la función RPC inversa de incremento de stock
       const promesas = detalles.map(d =>
         supabase.rpc('procesar_incremento_stock', {
-          p_producto_id: d.id_producto,
+          p_id_producto: d.id_producto,
           p_cantidad: d.cantidad
         })
       );
