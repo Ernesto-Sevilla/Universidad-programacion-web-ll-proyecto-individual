@@ -28,7 +28,7 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
           {producto.imagen_url ? (
             <img
               src={producto.imagen_url}
-              alt={producto.nombre_producto}
+              alt={producto.nombre}
               className="card-img-top object-fit-cover"
               loading="lazy"
               style={{ transition: "transform 0.4s" }}
@@ -47,7 +47,7 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
             id={`producto-${producto.id_producto}-title`}
             className="h6 fw-bold mb-2 text-dark mb-2"
           >
-            {producto.nombre_producto}
+            {producto.nombre}
           </Card.Title>
 
           {descripcion && (
@@ -78,7 +78,7 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
       <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} size="lg" centered>
         <Modal.Header closeButton className="border-0 pb-0">
           <Modal.Title className="fw-bold fs-4">
-            {producto.nombre_producto}
+            {producto.nombre}
           </Modal.Title>
         </Modal.Header>
 
@@ -88,7 +88,7 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
               {producto.imagen_url ? (
                 <img
                   src={producto.imagen_url}
-                  alt={producto.nombre_producto}
+                  alt={producto.nombre}
                   className="img-fluid rounded shadow-sm"
                   style={{ maxHeight: "400px", objectFit: "contain", width: "100%" }}
                 />

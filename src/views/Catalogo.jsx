@@ -18,7 +18,7 @@ const Catalogo = () => {
     try {
       setCargando(true);
       const [resProductos, resCategorias] = await Promise.all([
-        supabase.from("productos").select("*").order("nombre_producto", { ascending: true }),
+        supabase.from("productos").select("*").order("nombre", { ascending: true }),
         supabase.from("categorias").select("*").order("nombre_categoria"),
       ]);
 
@@ -55,7 +55,7 @@ const Catalogo = () => {
       filtrados = filtrados.filter((producto) => {
         if (!producto) return false;
 
-        const nombre = (producto.nombre_producto || "").toLowerCase();
+        const nombre = (producto.nombre || "").toLowerCase();
         const descripcion = (producto.descripcion_producto || "").toLowerCase();
         const precioTexto = (producto.precio_venta?.toString() || "").toLowerCase();
 
@@ -92,7 +92,7 @@ const Catalogo = () => {
       <Row className="text-center mb-1">
         <Col>
           <p className="lead text-muted">
-            Nuestros productos de belleza
+            Nuestros productos
           </p>
         </Col>
       </Row>
