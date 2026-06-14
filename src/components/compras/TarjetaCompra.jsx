@@ -66,15 +66,13 @@ export const TarjetaCompra = ({
             acciones={
               <div className="d-flex gap-2">
                 <Button
-                  variant="outline-warning"
+                  variant="outline-success"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    abrirModalEdicion(compra);
-                    cerrar();
-                  }}
+                  className="me-2"
+                  onClick={() => abrirModalEdicion(compra)}
+                  title="Ver detalles del lote (Solo Lectura)"
                 >
-                  <i className="bi bi-pencil me-1"></i> Editar
+                  <i className="bi bi-eye-fill">Lectura</i>
                 </Button>
 
                 <Button
