@@ -21,8 +21,12 @@ const Compras = () => {
   } = useCompras();
 
   // Estados locales de control de la UI
+  const [esModoLectura, setEsModoLectura] = useState(false);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [compraAEditar, setCompraAEditar] = useState(null);
+
+  // Estado para la compra seleccionada
+  const [compraSeleccionada, setCompraSeleccionada] = useState(null);
 
   const [proveedor, setProveedor] = useState("");
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
@@ -43,6 +47,10 @@ const Compras = () => {
 
   // Motor de búsquedas reactivo adaptado al módulo de compras
   useEffect(() => {
+    if(compras && compras.length > 0) {
+        console.log("¿Qué tienen mis compras?:", compras);
+    }
+
     if (!textoBusqueda.trim()) {
       setComprasFiltradas(compras);
     } else {
@@ -64,6 +72,8 @@ const Compras = () => {
   );
 
   const abrirNuevaCompra = () => {
+    setEsModoLectura(false);
+    setCompraSeleccionada(null);
     resetFormulario();
     setMostrarFormulario(true);
   };
@@ -118,6 +128,12 @@ const Compras = () => {
       }];
     });
   };
+
+  const abrirVerCompra = (compra) => {
+  setEsModoLectura(true); 
+  setCompraSeleccionada(compra);
+  setMostrarFormulario(true); 
+};
 
   const eliminarDetalle = (idProducto) => {
     setDetalles(prev => prev.filter(d => d.id_producto !== idProducto));
@@ -185,7 +201,7 @@ const Compras = () => {
           <div className="d-none d-md-block">
             <TablaCompras 
               compras={comprasPaginadas} 
-              abrirModalEdicion={abrirEdicion} 
+              abrirModalEdicion={abrirVerCompra} 
             />
           </div>
 
@@ -193,7 +209,7 @@ const Compras = () => {
           <div className="d-md-none">
             <TarjetaCompra 
               compras={comprasPaginadas} 
-              abrirModalEdicion={abrirEdicion} 
+              abrirModalEdicion={abrirVerCompra} 
             />
           </div>
 
@@ -211,6 +227,8 @@ const Compras = () => {
       <FormularioCompra
         mostrar={mostrarFormulario}
         setMostrar={setMostrarFormulario}
+        esModoLectura={esModoLectura}
+        compraSeleccionada={compraSeleccionada}
         empleados={empleados}
         productos={productos}
         proveedor={proveedor}
@@ -220,6 +238,7 @@ const Compras = () => {
         metodoPago={metodoPago}
         setMetodoPago={setMetodoPago}
         detalles={detalles}
+        setDetalles={setDetalles}
         totalGeneral={totalGeneral}
         agregarDetalle={agregarDetalle}
         eliminarDetalle={eliminarDetalle}

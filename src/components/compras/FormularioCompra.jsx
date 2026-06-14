@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Form, Button, Row, Col, Table, Card } from "react-bootstrap";
 
 export const FormularioCompra = ({
   mostrar,
   setMostrar,
+  esModoLectura,
+  compraSeleccionada,
   empleados,
   productos,
   proveedor,
@@ -13,6 +15,7 @@ export const FormularioCompra = ({
   metodoPago,
   setMetodoPago,
   detalles,
+  setDetalles,
   totalGeneral,
   agregarDetalle,
   eliminarDetalle,
@@ -23,6 +26,29 @@ export const FormularioCompra = ({
   const [productoIdTemp, setProductoIdTemp] = useState("");
   const [cantidadTemp, setCantidadTemp] = useState(1);
   const [deshabilitado, setDeshabilitado] = useState(false);
+
+  useEffect(() => {
+    if (compraSeleccionada) {
+      if (setProveedor) setProveedor(compraSeleccionada.proveedor || "");
+      if (setMetodoPago) setMetodoPago(compraSeleccionada.metodo_pago || "efectivo");
+
+      if (setEmpleadoSeleccionado && empleados) {
+        const emp = empleados.find((e) => e.id_empleado === compraSeleccionada.id_empleado);
+        setEmpleadoSeleccionado(emp || null);
+      }
+
+      if (setDetalles) {
+        setDetalles(compraSeleccionada.detalles_compras || []);
+      }
+    }
+
+    else {
+      if (setProveedor) setProveedor("");
+      if (setMetodoPago) setMetodoPago("efectivo");
+      if (setEmpleadoSeleccionado) setEmpleadoSeleccionado(null);
+      if (setDetalles) setDetalles([]);
+    }
+  }, [compraSeleccionada, empleados, setProveedor, setMetodoPago, setEmpleadoSeleccionado, setDetalles]);
 
   // Formateador de moneda regional (Córdobas - NIO)
   const formatearMoneda = (monto) => {
@@ -99,6 +125,7 @@ export const FormularioCompra = ({
                       type="text"
                       placeholder="Nombre de la empresa o proveedor"
                       value={proveedor}
+                      disabled={esModoLectura}
                       onChange={(e) => setProveedor(e.target.value)}
                       required
                     />
@@ -115,6 +142,7 @@ export const FormularioCompra = ({
                         const emp = empleados.find((em) => em.id_empleado === Number(e.target.value));
                         setEmpleadoSeleccionado(emp || null);
                       }}
+                      disabled={esModoLectura}
                       required
                     >
                       <option value="">-- Seleccionar Empleado --</option>
@@ -134,6 +162,7 @@ export const FormularioCompra = ({
                     <Form.Select
                       value={metodoPago}
                       onChange={(e) => setMetodoPago(e.target.value)}
+                      disabled={esModoLectura}
                       required
                     >
                       <option value="efectivo">Efectivo</option>
@@ -149,7 +178,7 @@ export const FormularioCompra = ({
 
           {/* SECCIÓN 2: AGREGAR PRODUCTOS AL DETALLE */}
           <Card className="mb-3 border-secondary-subtle shadow-sm">
-            <Card.Body>
+            <Card.Body disabled={esModoLectura}>
               <h6 className="text-uppercase text-secondary fw-bold mb-3 small">Cargar Lote de Artículos</h6>
               <Row className="align-items-end">
                 <Col md={7}>
@@ -158,6 +187,7 @@ export const FormularioCompra = ({
                     <Form.Select
                       value={productoIdTemp}
                       onChange={(e) => setProductoIdTemp(e.target.value)}
+                      disabled={esModoLectura}
                     >
                       <option value="">-- Seleccione un artículo --</option>
                       {productos.map((p) => (
@@ -176,6 +206,7 @@ export const FormularioCompra = ({
                       min="1"
                       value={cantidadTemp}
                       onChange={(e) => setCantidadTemp(e.target.value)}
+                      disabled={esModoLectura}
                     />
                   </Form.Group>
                 </Col>
@@ -183,6 +214,7 @@ export const FormularioCompra = ({
                   <Button
                     variant="success"
                     className="w-100"
+                    disabled={esModoLectura}
                     onClick={handleAgregarProducto}
                     disabled={!productoIdTemp}
                   >
@@ -243,6 +275,7 @@ export const FormularioCompra = ({
                         <Button
                           variant="link"
                           className="text-danger p-0"
+                          disabled={esModoLectura}
                           onClick={() => eliminarDetalle(item.id_producto)}
                         >
                           <i className="bi bi-trash-fill fs-5"></i>
@@ -260,14 +293,15 @@ export const FormularioCompra = ({
           <Button variant="secondary" className="me-2" onClick={() => setMostrar(false)}>
             Cancelar
           </Button>
-
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={detalles.length === 0 || deshabilitado}
-          >
-            {deshabilitado ? "Guardando..." : "Procesar Compra"}
-          </Button>
+          {!esModoLectura && (
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={detalles.length === 0 || deshabilitado}
+            >
+              {deshabilitado ? "Guardando..." : "Procesar Compra"}
+            </Button>
+          )}
         </Modal.Footer>
       </Form>
     </Modal>
