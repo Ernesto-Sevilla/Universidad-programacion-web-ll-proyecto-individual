@@ -47,10 +47,6 @@ const Compras = () => {
 
   // Motor de búsquedas reactivo adaptado al módulo de compras
   useEffect(() => {
-    if(compras && compras.length > 0) {
-        console.log("¿Qué tienen mis compras?:", compras);
-    }
-
     if (!textoBusqueda.trim()) {
       setComprasFiltradas(compras);
     } else {
