@@ -206,7 +206,7 @@ const Ventas = () => {
             <TarjetaVenta
               ventas={ventasPaginadas}
               abrirModalEdicion={abrirEdicion}
-              generarPDFVenta={() => { }}
+              generarPDFVenta={handleDescargarRecibo}
             />
           </div>
 

@@ -1,7 +1,7 @@
 // src/views/Compras.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
-import { useCompras } from "@/hooks";
+import { useCompras, usePDFGenerator } from "@/hooks";
 
 import NotificacionOperacion from "../components/NotificationOperation";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
@@ -33,6 +33,9 @@ const Compras = () => {
   const [metodoPago, setMetodoPago] = useState("efectivo");
   const [detalles, setDetalles] = useState([]);
   const [totalGeneral, setTotalGeneral] = useState(0);
+
+  // Estado para la generación de reportes
+  const { generatePurchasePDF, isGenerating } = usePDFGenerator();
 
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [comprasFiltradas, setComprasFiltradas] = useState([]);
@@ -159,6 +162,10 @@ const Compras = () => {
     }
   };
 
+  const handleDescargarReciboCompras = (compra) => {
+    generatePurchasePDF(compra, `recibo_compra_#${compra.id_compra}.pdf`);
+  };
+
   return (
     <Container fluid className="py-4">
       <NotificacionOperacion 
@@ -198,6 +205,7 @@ const Compras = () => {
             <TablaCompras 
               compras={comprasPaginadas} 
               abrirModalEdicion={abrirVerCompra} 
+              generarPDFCompra={handleDescargarReciboCompras}
             />
           </div>
 
@@ -206,6 +214,7 @@ const Compras = () => {
             <TarjetaCompra 
               compras={comprasPaginadas} 
               abrirModalEdicion={abrirVerCompra} 
+              generarPDFCompra={handleDescargarReciboCompras}
             />
           </div>
 

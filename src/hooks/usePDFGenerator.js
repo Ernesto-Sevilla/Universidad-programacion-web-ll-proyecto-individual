@@ -154,5 +154,100 @@ export const usePDFGenerator = () => {
     }
   };
 
-  return { generateDashboardPDF, generateReceiptPDF, isGenerating, error };
+  const generatePurchasePDF = async (compra, filename = null) => {
+    if (!compra) {
+      setError("No se proporcionaron datos de la compra.");
+      return;
+    }
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const nameFile = filename || `reporte_compra_#${compra.id_compra}.pdf`;
+
+      // Encabezado Azul Corporativo para Compras
+      pdf.setFillColor(0, 123, 255);
+      pdf.rect(0, 0, 210, 40, 'F');
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(22);
+      pdf.text("ORDEN DE COMPRA", 14, 25);
+
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Folio ID: # ${compra.id_compra || 'N/A'}`, 150, 25);
+
+      // Metadatos
+      pdf.setTextColor(33, 37, 41);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Detalles del Abastecimiento", 14, 55);
+
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      const fecha = compra.fecha_compra ? new Date(compra.fecha_compra).toLocaleString() : new Date().toLocaleString();
+      pdf.text(`Fecha Compra: ${fecha}`, 14, 65);
+      pdf.text(`Método de Pago: ${compra.metodo_pago?.toUpperCase() || 'EFECTIVO'}`, 14, 72);
+
+      const empleado = compra.empleados ? `${compra.empleados.nombre_empleado} ${compra.empleados.apellido_empleado || ''}` : 'Sistema';
+      pdf.text(`Registrado por: ${empleado}`, 14, 79);
+
+      // Si tienes join con la tabla proveedor de Supabase
+      if (compra.proveedor) {
+        pdf.text(`Proveedor: ${compra.proveedor || 'Proveedor General'}`, 14, 86);
+      }
+
+      // Tabla de insumos/productos ingresados
+      const detallesRaw = compra.detalles_compras || [];
+      const tableRows = detallesRaw.map((item, index) => [
+        index + 1,
+        item.nombre || item.productos?.nombre || `Producto ID: ${item.id_producto}`,
+        item.cantidad,
+        `$${parseFloat(item.precio_costo || 0).toFixed(2)}`, // Las compras usan precio_costo
+        `$${(item.cantidad * parseFloat(item.precio_costo || 0)).toFixed(2)}`
+      ]);
+
+      autoTable(pdf, {
+        startY: 95,
+        head: [['#', 'Producto / Insumo', 'Cant.', 'Costo Unit.', 'Subtotal']],
+        body: tableRows,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 123, 255] }, // Azul consistente
+        styles: { font: "helvetica", fontSize: 9 },
+        columnStyles: {
+          0: { cellWidth: 10 },
+          2: { cellWidth: 15, halign: 'center' },
+          3: { cellWidth: 30, halign: 'right' },
+          4: { cellWidth: 30, halign: 'right' }
+        }
+      });
+
+      const finalY = pdf.lastAutoTable.finalY + 10;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(14);
+      pdf.text(`TOTAL FACTURADO: $${parseFloat(compra.total || 0).toFixed(2)}`, 130, finalY);
+
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(108, 117, 125);
+      pdf.text("SmartVentas - Control de Inventario Logístico", 14, 280);
+
+      pdf.save(nameFile);
+    } catch (err) {
+      console.error("Error al generar reporte de compra:", err);
+      setError("No se pudo construir el reporte de compra en PDF.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return { 
+    generateDashboardPDF, 
+    generateReceiptPDF, 
+    generatePurchasePDF, 
+    isGenerating, 
+    error 
+  };
 };
